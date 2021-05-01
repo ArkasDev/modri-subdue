@@ -137,9 +137,9 @@ def experiment_evaluation(experiment_path):
     os.remove(experiment_path + "/stats_topn.csv")
     os.remove(experiment_path + "/stats_topn_frequency.csv")
     with open(experiment_path + "/stats_topn.csv", 'w') as stats_tpn:
-        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "score", "score_2", "heap_size"\r\n')
+        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
     with open(experiment_path + "/stats_topn_frequency.csv", 'w') as stats_tpn:
-        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "score", "score_2", "heap_size"\r\n')
+        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
 
     # Evaluate each experiment
     for set_name in os.listdir(experiment_path):
