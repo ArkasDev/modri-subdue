@@ -17,7 +17,7 @@ experiment_path = None
 print_results_bool = None
 
 
-def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8):
+def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
     # parameters
     global data_set_path
     global experiment_path
@@ -28,6 +28,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8):
     hops_i = 200
     max_n = int(arg3)
     elapsed_time = float(arg4)
+    heap_size = arg9
     is_simulation = arg5
     is_evaluation = arg6
     print_results_bool = arg7
@@ -38,6 +39,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8):
     print(colored("threshold: " + str(threshold), 'yellow'))
     print(colored("max_n: " + str(max_n), 'yellow'))
     print(colored("elapsed_time: " + str(elapsed_time), 'yellow'))
+    print(colored("heap_size: " + str(heap_size), 'yellow'))
     print(colored("is_simulation: " + str(is_simulation), 'yellow'))
     print(colored("is_evaluation: " + str(is_evaluation), 'yellow'))
     print(colored("print_results: " + str(print_results_bool), 'yellow'))
@@ -131,7 +133,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8):
                     [nb_diffs, nb_eos, pertubation, str(number_of_nodes_per_component),
                      str(number_of_edges_per_component),
                      str(degree_per_component), str(avg_nb_of_components_per_diff), str(nb_components), str(threshold),
-                     str(size_at_threshold), str(cnt_exact_match_1), str(cnt_exact_match_2), str(elapsed_time), score_1,
+                     str(size_at_threshold), str(cnt_exact_match_1), str(cnt_exact_match_2), str(elapsed_time), str(heap_size), score_1,
                      score_2])
 
         evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
@@ -405,4 +407,4 @@ def average(lst):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])

@@ -45,7 +45,7 @@ def prepare_experiment(experiment_path):
         with open(experiment_path + "/" + set_name + "/threshold.txt", 'w') as threshold_file:
             threshold_file.write(str(threshold))
 
-        # Create empty output graph file
+        # Create empty output graph file so that after mining the output graph can be written
         with open(experiment_path + "/" + set_name + "/fsg.output", 'w') as output_graph_file:
             output_graph_file.write("")
 
@@ -84,12 +84,16 @@ def run_graph_mining(experiment_path, algorithm):
         runtime = end_time - start_time
         heap_stats = end_heap_status.diff(start_heap_status)
         print("Runtime: %s s" % runtime)
-        print("Heap: %s bytes" % heap_stats.size)
+        print("Heap: %s bytes" % str(heap_stats.size))
         print("-------------------------------")
 
-        # Save runtime in file for eval
+        # Save runtime (seconds) in file for eval
         with open(experiment_path + "/" + set_name + "/runtime.txt", 'w') as runtime_file:
             runtime_file.write(str(runtime))
+
+        # Save heap size (bytes) in file for eval
+        with open(experiment_path + "/" + set_name + "/heap_size.txt", 'w') as heap_size_file:
+            heap_size_file.write(str(heap_stats.size))
 
 
 def run_gaston(experiment_path, graph, threshold):
@@ -129,6 +133,15 @@ def experiment_evaluation(experiment_path):
     print("### Evaluation")
     print("########################################")
 
+    # Remove old evaluation files and create new empty files
+    os.remove(experiment_path + "/stats_topn.csv")
+    os.remove(experiment_path + "/stats_topn_frequency.csv")
+    with open(experiment_path + "/stats_topn.csv", 'w') as stats_tpn:
+        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "score", "score_2", "heap_size"\r\n')
+    with open(experiment_path + "/stats_topn_frequency.csv", 'w') as stats_tpn:
+        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "score", "score_2", "heap_size"\r\n')
+
+    # Evaluate each experiment
     for set_name in os.listdir(experiment_path):
 
         # Skip other files, just loop through dataset folders
@@ -140,10 +153,12 @@ def experiment_evaluation(experiment_path):
             threshold = threshold_file.read()
         with open(experiment_path + "/" + set_name + "/runtime.txt", 'r') as runtime_file:
             runtime = runtime_file.read()
+        with open(experiment_path + "/" + set_name + "/heap_size.txt", 'r') as heap_size_file:
+            heap_size = heap_size_file.read()
 
         # Start evaluation script
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, False, experiment_path)
+        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, False, experiment_path, heap_size)
 
 
 if __name__ == "__main__":
-    run_experiment(data_set_path=experiment_0_path, algorithm="gaston", skip_preparation=True, skip_mining=True, skip_evaluation=False)
+    run_experiment(data_set_path=experiment_0_path, algorithm="gaston", skip_preparation=False, skip_mining=False, skip_evaluation=False)
