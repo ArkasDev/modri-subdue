@@ -107,7 +107,7 @@ class ParsemisMiner:
                     "--connectedFragments=%s" % kwargs.get('connectedFragments', True),
                     "--algorithm=%s" % kwargs.get('algorithm', 'gspan'),
                     "--closeGraph=%s" % kwargs.get('close_graph', False),
-                    "--subdue=%s" % kwargs.get('subdue', False),
+                    "--subdue_python=%s" % kwargs.get('subdue_python', False),
                     "--zaretsky=%s" % kwargs.get('zaretsky', False),
                     "--distribution=%s" % kwargs.get('distribution', 'threads'),
                     "--threads=%s" % kwargs.get('n_threads', 1),

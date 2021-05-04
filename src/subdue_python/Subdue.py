@@ -8,11 +8,9 @@ import sys
 import time
 import json
 import contextlib
-import Parameters
-import Graph
-import Pattern
-
-from guppy import hpy
+import subdue_python.Graph as Graph
+import subdue_python.Pattern as Pattern
+import subdue_python.Parameters as Parameters
 
 DEBUGFLAG = False
 
@@ -27,7 +25,7 @@ def main():
     parameters.set_defaults_for_graph(graph)
     parameters.print()
 
-    # Execute subdue algorithm
+    # Execute subdue_python algorithm
     subdue(parameters, graph)
 
 
@@ -37,7 +35,7 @@ def read_graph(input_file_name):
     """
 
     # Load graph from file
-    with open(input_file_name, 'a') as input_graph_file:
+    with open(input_file_name, 'r') as input_graph_file:
         json_graph = json.load(input_graph_file)
 
         # Create graph data structure
@@ -56,11 +54,6 @@ def subdue(parameters, graph):
     :param parameters: instance of Subdue.Parameters
     :return: patterns for each iteration -- a list of iterations each containing discovered patterns.
     """
-
-    # Start with performance test for the entire Subdue
-    heap = hpy()
-    heap_status1 = heap.heap()
-    start_time = time.time()
 
     iteration = 1
     done = False
@@ -82,9 +75,6 @@ def subdue(parameters, graph):
         # 1. PHASE: Start with substructure discovery
         # Temporary list of found patterns in this iteration
         pattern_list = substructure_discover(parameters, graph)
-
-
-
 
         if (not pattern_list):
             done = True
@@ -116,23 +106,6 @@ def subdue(parameters, graph):
              iterationEndTime = time.time()
              print("Elapsed time for iteration " + str(iteration) + " = " + str(iterationEndTime - iteration_start_time) + " seconds.\n")
         iteration += 1
-
-    endTime = time.time()
-
-    heap_status2 = heap.heap()
-    stats = heap_status2.diff(heap_status1)
-
-    with open('../../asset/output/subdue_run_infos.txt', 'a') as the_file:
-        the_file.write("Total Objects: " + str(stats.count) + "\n")
-        the_file.write("Number of Entries  " + str(stats.numrows) + "\n")
-        the_file.write("Total Size: " + str(stats.size) + " bytes" + "\n")
-        the_file.write("Elapsed time:  " + str(endTime - start_time) + " seconds" + "\n")
-        the_file.write("\n\n")
-
-    print("Total Objects : ", stats.count)
-    print("Number of Entries : ", stats.numrows)
-    print("Total Size : ", stats.size, " bytes")
-    print("SUBDUE done. Elapsed time = " + str(endTime - start_time) + " seconds\n")
 
     return patterns
 
@@ -305,9 +278,6 @@ def unwrap_output(iterations):
             iter_out.append(pattern_out)
         out.append(iter_out)
     return out
-
-
-
 
 
 if __name__ == "__main__":
