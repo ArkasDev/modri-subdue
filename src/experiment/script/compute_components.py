@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import experiment.script.converter as converter
 import networkx as nx
 from networkx.readwrite import json_graph
 import numpy as np
@@ -50,6 +51,52 @@ def export_aids(graph_db, path):
         f.write('\r')
         i = i + 1
     f.close()
+
+
+def export_subdue_c_graph(graph_db, path):
+    return
+
+
+def export_subdue_python_json(graph_db, path):
+    with open(path, 'w') as output_graph_file:
+        output_graph_file.write('[\n')
+        last_node_id_from_last_graph = 0
+        last_edge_id_from_last_graph = 0
+
+        for i, graph in enumerate(graph_db):
+            temp_graph = nx.convert_node_labels_to_integers(graph, first_label=0)
+            vertices = temp_graph.nodes(data=True)
+            edges = temp_graph.edges(data=True)
+
+            starting_node_id_from_current_graph = last_node_id_from_last_graph
+
+            for n, node in enumerate(vertices):
+                output_graph_file.write('  {"vertex": {\n')
+                output_graph_file.write('    "id": "' + str(last_node_id_from_last_graph + n) + '",\n')
+                output_graph_file.write('    "attributes": {"label": "' + node[1]['label'] + '"}}},\n')
+                # Last edge
+                if n == len(vertices) - 1:
+                    last_node_id_from_last_graph = last_node_id_from_last_graph + n
+
+            for j, edge in enumerate(edges):
+                output_graph_file.write('  {"edge": {\n')
+                output_graph_file.write('    "id": "' + str(last_edge_id_from_last_graph + j) + '",\n')
+                output_graph_file.write('    "source": "' + str(edge[0] + starting_node_id_from_current_graph) + '",\n')
+                output_graph_file.write('    "target": "' + str(edge[1] + starting_node_id_from_current_graph) + '",\n')
+                output_graph_file.write('    "directed": "false",\n')
+
+                # Check for the last edge
+                if j == len(edges) - 1:
+                    last_edge_id_from_last_graph = last_edge_id_from_last_graph + j
+                    # Dont write a comma for the last attribute in the file
+                    if len(graph_db) == i + 1:
+                        output_graph_file.write('    "attributes": {"label": "' + str(edge[2]['label']) + '"}}}\n')
+                    else:
+                        output_graph_file.write('    "attributes": {"label": "' + str(edge[2]['label']) + '"}}},\n')
+                else:
+                    output_graph_file.write('    "attributes": {"label": "' + str(edge[2]['label']) + '"}}},\n')
+
+        output_graph_file.write(']\n')
 
 
 # TODO this can be done asynchronously using yield
@@ -111,6 +158,8 @@ def main(args):
     # Export in TLV
     export_TLV(components, "./" + set_name + '/connected_components.lg')
     export_aids(components, "./" + set_name + '/connected_components.aids')
+    export_subdue_c_graph(components, "./" + set_name + '/connected_components.g')
+    export_subdue_python_json(components, "./" + set_name + '/connected_components.json')
 
 
 if __name__ == "__main__":

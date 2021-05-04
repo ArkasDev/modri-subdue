@@ -22,7 +22,7 @@ def convert_node_link_graph_to_parsemis_directed_graph(input_file, output_file):
 
 def convert_node_link_graph_to_subdue_c_graph(input_file, output_file):
     """
-    Convert node link graph to graph used in the subdue c implementation https://github.com/gromgull/subdue.
+    Convert node link graph to graph used in the subdue_python c implementation https://github.com/gromgull/subdue.
     """
     json_file = json.load(open(input_file))
 
@@ -40,7 +40,7 @@ def convert_node_link_graph_to_subdue_c_graph(input_file, output_file):
 
 def convert_node_link_graph_to_subdue_python_graph(input_file, output_file):
     """
-    Convert node link graph to graph used in the subdue python implementation https://github.com/holderlb/Subdue.
+    Convert node link graph to graph used in the subdue_python python implementation https://github.com/holderlb/Subdue.
     """
     json_file = json.load(open(input_file))
 

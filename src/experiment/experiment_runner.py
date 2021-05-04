@@ -1,82 +1,119 @@
+"""
+
+"""
+
 import os
 import math
 import time
 import experiment.script.eval as evaluation
 import experiment.script.compute_components as compute
+import subdue_c.subdue_c as subdue_c
+from subdue_python import Subdue, Parameters
 from guppy import hpy
-from util.parsemis import ParsemisMiner
+from parsemis.parsemis import ParsemisMiner
 
+# My local experiment folder paths
 experiment_0_path = "../../data/experiment_0"
 experiment_1_path = "../../data/experiment_1"
 experiment_2_path = "../../data/experiment_2"
 
+# Relative threshold for the frequent subgraph mining algorithms
 relative_threshold = 0.1
 
 
-def run_experiment(data_set_path, algorithm="gaston", skip_preparation=True, skip_mining=False, skip_evaluation=False):
+def run_experiment(experiment_data_set_path, algorithm="gaston", skip_preparation=True, skip_mining=False, skip_evaluation=False):
+    """
+    :param experiment_data_set_path: Path to the experiment data set
+    :param algorithm: Use an algorithm for graph mining the model repositories: gaston, gspan, subdue_c, subdue_python, modri_subdue
+    :param skip_preparation: If true it skips the experiment preparation. Usually only needs to be performed once
+    :param skip_mining: If true it skips the graph mining phase
+    :param skip_evaluation: If true it skips the evaluation phase
+    """
+
     if not skip_preparation:
-        prepare_experiment(data_set_path)
+        prepare_experiment(experiment_data_set_path)
 
     if not skip_mining:
-        run_graph_mining(data_set_path, algorithm)
+        run_graph_mining(experiment_data_set_path, algorithm)
 
     if not skip_evaluation:
-        experiment_evaluation(data_set_path)
+        experiment_evaluation(experiment_data_set_path)
 
 
-def prepare_experiment(experiment_path):
+def prepare_experiment(experiment_data_set_path):
     print("########################################")
     print("### Experiment preparation ")
     print("########################################")
 
-    for set_name in os.listdir(experiment_path):
+    # Loop through all single data sets in the experiment folder
+    for single_set_name in os.listdir(experiment_data_set_path):
 
-        # Skip other files, just loop through dataset folders
-        if not set_name.startswith("SingleEO"):
+        # Ignore other files in the experiment root folder, just loop through single data set folders
+        if not single_set_name.startswith("SingleEO"):
             continue
 
-        # Create .lg and .aids file via compute component script
-        compute.main(experiment_path + "/" + set_name)
+        # Create graph input files via compute component script
+        # These graph files are required as input for the mining graph algorithms
+        compute.main(experiment_data_set_path + "/" + single_set_name)
 
-        # Compute threshold
-        threshold = compute_threshold(experiment_path + "/" + set_name + "/connected_components.aids")
+        # Compute threshold required for the mining phase of the frequent subgraph mining algorithms
+        threshold = compute_threshold(experiment_data_set_path + "/" + single_set_name + "/connected_components.aids")
 
         # Save the threshold for the execution of frequent subgraph mining algorithms
-        with open(experiment_path + "/" + set_name + "/threshold.txt", 'w') as threshold_file:
+        with open(experiment_data_set_path + "/" + single_set_name + "/threshold.txt", 'w') as threshold_file:
             threshold_file.write(str(threshold))
 
-        # Create empty output graph file so that after mining the output graph can be written
-        with open(experiment_path + "/" + set_name + "/fsg.output", 'w') as output_graph_file:
+        # Create empty output graph file so that after the mining phase of each single data set the output graph can be written
+        with open(experiment_data_set_path + "/" + single_set_name + "/fsg.output", 'w') as output_graph_file:
             output_graph_file.write("")
 
 
-def run_graph_mining(experiment_path, algorithm):
+def run_graph_mining(experiment_data_set_path, algorithm):
     print("########################################")
     print("### Graph mining")
     print("########################################")
 
-    for set_name in os.listdir(experiment_path):
+    # Loop through all single data sets in the experiment folder
+    for single_set_name in os.listdir(experiment_data_set_path):
 
-        # Skip other files, just loop through dataset folders
-        if not set_name.startswith("SingleEO"):
+        # Ignore other files in the experiment root folder, just loop through single data set folders
+        if not single_set_name.startswith("SingleEO"):
             continue
 
-        graph = experiment_path + "/%s/connected_components.lg" % set_name
-
-        # Start performance test
+        # Start performance test, start measuring the runtime and the heap space
         heap = hpy()
         start_heap_status = heap.heap()
         start_time = time.time()
 
-        # Load threshold
-        with open(experiment_path + "/" + set_name + "/threshold.txt", 'r') as threshold_file:
+        # Load the threshold calculated during the preparation phase
+        with open(experiment_data_set_path + "/" + single_set_name + "/threshold.txt", 'r') as threshold_file:
             threshold = threshold_file.read()
 
-        # Run mining algorithm
+        # Run the selected graph mining algorithm
         if algorithm == "gaston":
-            run_gaston(experiment_path + "/" + set_name, graph, threshold)
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.lg" % single_set_name
+            # Run Gaston
+            run_gaston(experiment_data_set_path + "/" + single_set_name, graph, threshold)
         if algorithm == "gspan":
-            run_gspan(experiment_path + "/" + set_name, graph, threshold)
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.lg" % single_set_name
+            # Run Gspan
+            run_gspan(experiment_data_set_path + "/" + single_set_name, graph, threshold)
+        if algorithm == "subdue_python":
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
+            # Run Python Subdue
+            run_subdue_python(experiment_data_set_path + "/" + single_set_name, graph)
+        if algorithm == "subdue_c":
+            graph = experiment_data_set_path + "/%s/connected_components.g" % single_set_name
+            # Run C Subdue
+            run_subdue_c(experiment_data_set_path + "/" + single_set_name, graph)
+        if algorithm == "modri_subdue":
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
+            # Run ModriSubdue
+            run_modri_subdue(experiment_data_set_path + "/" + single_set_name, graph)
 
         # End performance test
         end_time = time.time()
@@ -88,12 +125,49 @@ def run_graph_mining(experiment_path, algorithm):
         print("-------------------------------")
 
         # Save runtime (seconds) in file for eval
-        with open(experiment_path + "/" + set_name + "/runtime.txt", 'w') as runtime_file:
+        with open(experiment_data_set_path + "/" + single_set_name + "/runtime.txt", 'w') as runtime_file:
             runtime_file.write(str(runtime))
 
         # Save heap size (bytes) in file for eval
-        with open(experiment_path + "/" + set_name + "/heap_size.txt", 'w') as heap_size_file:
+        with open(experiment_data_set_path + "/" + single_set_name + "/heap_size.txt", 'w') as heap_size_file:
             heap_size_file.write(str(heap_stats.size))
+
+
+def run_subdue_python(experiment_path, graph_file):
+    # Convert json graph file to the subdue graph data structure
+    graph = Subdue.read_graph(graph_file)
+
+    # Subdue parameters
+    parameters = Parameters.Parameters()
+    parameters.outputFileName = experiment_path + "/subgraph_python.output"
+    parameters.beamWidth = 4
+    parameters.iterations = 1
+    parameters.limit = 7
+    parameters.maxSize = 7
+    parameters.minSize = 1
+    parameters.numBest = 1
+    parameters.overlap = 'none'
+    parameters.prune = False
+    parameters.valueBased = False
+    parameters.writeCompressed = False
+    parameters.writePattern = False
+    parameters.writeInstances = False
+    parameters.temporal = False
+    parameters.print()
+    parameters.set_defaults_for_graph(graph)
+
+    # Run the Python Subdue implementation
+    Subdue.subdue(parameters, graph)
+    return
+
+
+def run_subdue_c(experiment_path, graph):
+    subdue_c.run()
+    return
+
+
+def run_modri_subdue(experiment_path, graph):
+    return
 
 
 def run_gaston(experiment_path, graph, threshold):
@@ -161,4 +235,5 @@ def experiment_evaluation(experiment_path):
 
 
 if __name__ == "__main__":
-    run_experiment(data_set_path=experiment_0_path, algorithm="gaston", skip_preparation=False, skip_mining=False, skip_evaluation=False)
+    run_experiment(experiment_data_set_path=experiment_0_path, algorithm="subdue_python",
+                   skip_preparation=False, skip_mining=False, skip_evaluation=True)
