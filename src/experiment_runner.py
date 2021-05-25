@@ -3,6 +3,7 @@
 """
 
 import os
+import sys
 import math
 import time
 import experiment.script.eval as evaluation
@@ -13,6 +14,7 @@ from guppy import hpy
 from parsemis.parsemis import ParsemisMiner
 
 # My local experiment folder paths
+experiment_folder_prefix = "SingleEO"
 experiment_0_path = "../../data/experiment_0"
 experiment_1_path = "../../data/experiment_1"
 experiment_2_path = "../../data/experiment_2"
@@ -21,7 +23,7 @@ experiment_2_path = "../../data/experiment_2"
 relative_threshold = 0.1
 
 
-def run_experiment(experiment_data_set_path, algorithm="gaston", skip_preparation=True, skip_mining=False, skip_evaluation=False):
+def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix, skip_preparation=True, skip_mining=False, skip_evaluation=False):
     """
     :param experiment_data_set_path: Path to the experiment data set
     :param algorithm: Use an algorithm for graph mining the model repositories: gaston, gspan, subdue_c, subdue_python, modri_subdue
@@ -31,16 +33,16 @@ def run_experiment(experiment_data_set_path, algorithm="gaston", skip_preparatio
     """
 
     if not skip_preparation:
-        prepare_experiment(experiment_data_set_path)
+        prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix)
 
     if not skip_mining:
-        run_graph_mining(experiment_data_set_path, algorithm)
+        run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix)
 
     if not skip_evaluation:
-        experiment_evaluation(experiment_data_set_path)
+        experiment_evaluation(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix)
 
 
-def prepare_experiment(experiment_data_set_path):
+def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix):
     print("########################################")
     print("### Experiment preparation ")
     print("########################################")
@@ -49,7 +51,7 @@ def prepare_experiment(experiment_data_set_path):
     for single_set_name in os.listdir(experiment_data_set_path):
 
         # Ignore other files in the experiment root folder, just loop through single data set folders
-        if not single_set_name.startswith("SingleEO"):
+        if not single_set_name.startswith(experiment_folder_prefix):
             continue
 
         # Create graph input files via compute component script
@@ -68,7 +70,7 @@ def prepare_experiment(experiment_data_set_path):
             output_graph_file.write("")
 
 
-def run_graph_mining(experiment_data_set_path, algorithm):
+def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
     print("########################################")
     print("### Graph mining")
     print("########################################")
@@ -77,7 +79,7 @@ def run_graph_mining(experiment_data_set_path, algorithm):
     for single_set_name in os.listdir(experiment_data_set_path):
 
         # Ignore other files in the experiment root folder, just loop through single data set folders
-        if not single_set_name.startswith("SingleEO"):
+        if not single_set_name.startswith(experiment_folder_prefix):
             continue
 
         # Start performance test, start measuring the runtime and the heap space
@@ -202,7 +204,7 @@ def compute_threshold(aids_file_path):
     return math.ceil(relative_threshold * number_of_components)
 
 
-def experiment_evaluation(experiment_path):
+def experiment_evaluation(experiment_path, experiment_folder_prefix=experiment_folder_prefix):
     print("########################################")
     print("### Evaluation")
     print("########################################")
@@ -219,7 +221,7 @@ def experiment_evaluation(experiment_path):
     for set_name in os.listdir(experiment_path):
 
         # Skip other files, just loop through dataset folders
-        if not set_name.startswith("SingleEO"):
+        if not set_name.startswith(experiment_folder_prefix):
             continue
 
         # Read threshold and runtime
@@ -231,9 +233,18 @@ def experiment_evaluation(experiment_path):
             heap_size = heap_size_file.read()
 
         # Start evaluation script
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, False, experiment_path, heap_size)
+        # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
+        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, False, False, True, experiment_path, heap_size)
 
 
 if __name__ == "__main__":
-    run_experiment(experiment_data_set_path=experiment_0_path, algorithm="subdue_python",
-                   skip_preparation=False, skip_mining=False, skip_evaluation=True)
+    if len(sys.argv) == 4:
+        experiment_path = sys.argv[1]
+        algorithm = sys.argv[2]
+        exp_folder_prefix =  sys.argv[3]
+    else:
+        experiment_path = experiment_0_path
+        algorithm = "gaston"
+        exp_folder_prefix = experiment_folder_prefix
+    run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
+                   skip_preparation=False, skip_mining=False, skip_evaluation=False)

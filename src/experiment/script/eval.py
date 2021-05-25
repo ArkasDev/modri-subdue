@@ -93,9 +93,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
 
     ################################## PRINT GRAPHS ############################################
     # print as dictionary parent with children
-    print_results(lattice_pruned, sg_lattice, 100, lambda element: compression_key(sg_lattice, element),
+    print_results(lattice_pruned, sg_lattice, 10, lambda element: compression_key(sg_lattice, element),
                   10, label="compression", export_pickle=True)
-    print_results(lattice_pruned_f, sg_lattice, 100, lambda element: frequency_key(sg_lattice, element),
+    print_results(lattice_pruned_f, sg_lattice, 10, lambda element: frequency_key(sg_lattice, element),
                   10, label="frequency", export_pickle=True)
 
         # print as list

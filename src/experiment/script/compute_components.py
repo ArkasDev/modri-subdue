@@ -154,12 +154,12 @@ def label_count_for_component(component):
 def main(args):
     set_name = args
     # Load components
-    components, nb_of_components_per_diff = load_components_networkx("./" + set_name + '/diffgraphs', filtered=True)
+    components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
     # Export in TLV
-    export_TLV(components, "./" + set_name + '/connected_components.lg')
-    export_aids(components, "./" + set_name + '/connected_components.aids')
-    export_subdue_c_graph(components, "./" + set_name + '/connected_components.g')
-    export_subdue_python_json(components, "./" + set_name + '/connected_components.json')
+    export_TLV(components, set_name + '/connected_components.lg')
+    export_aids(components, set_name + '/connected_components.aids')
+    export_subdue_c_graph(components, set_name + '/connected_components.g')
+    export_subdue_python_json(components, set_name + '/connected_components.json')
 
 
 if __name__ == "__main__":

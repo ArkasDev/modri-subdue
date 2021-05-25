@@ -1,3 +1,4 @@
 /data/
 /asset/
 .idea/
+**/__pycache__/
