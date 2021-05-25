@@ -7,8 +7,8 @@ pip install guppy3
 ```
 
 ### Prepare your data
-You need to create some folders, one for every dataset, in a root folder for your experiment.
-These folder should be named `{prefix}_{number of datasets}_eo{n}_p{perturbation},`. In each of der folders, there must be a subfolder called `diffgraphs`. The are expected to be graphs in the `networkx` [JSON format](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html).
+You need to create some folders, one for every dataset, in a root folder for your experiment. All folders for the datasets should have a common prefix. In case you have only one dataset, also add a subfolder in your experiment folder.
+In each of der folders, there must be a subfolder called `diffgraphs`. The graphs are expected to be given in the `networkx` [JSON format](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html).
 
 
 ### Run
@@ -21,6 +21,9 @@ Substitude `{path_to_your_experiment}` by the root folder to your experiment, `{
 
 ### Results
 For each dataset, the results will be put in a subfolder `results` of your dataset.
+
+### Statistical evaluation (In case you have a groundtruth)
+TBD
 
 ## Credits
 - Subdue Python https://github.com/holderlb/Subdue
