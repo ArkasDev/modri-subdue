@@ -15,12 +15,12 @@ from parsemis.parsemis import ParsemisMiner
 
 # My local experiment folder paths
 experiment_folder_prefix = "SingleEO"
-experiment_0_path = "../../data/experiment_0"
-experiment_1_path = "../../data/experiment_1"
-experiment_2_path = "../../data/experiment_2"
+experiment_0_path = "../data/experiment_0"
+experiment_1_path = "../data/experiment_1"
+experiment_2_path = "../data/experiment_2"
 
 # Relative threshold for the frequent subgraph mining algorithms
-relative_threshold = 0.1
+relative_threshold = 0.4
 
 
 def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix, skip_preparation=True, skip_mining=False, skip_evaluation=False):
@@ -39,7 +39,7 @@ def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_fold
         run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix)
 
     if not skip_evaluation:
-        experiment_evaluation(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix)
+        experiment_evaluation(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix)
 
 
 def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix):
@@ -68,6 +68,8 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
         # Create empty output graph file so that after the mining phase of each single data set the output graph can be written
         with open(experiment_data_set_path + "/" + single_set_name + "/fsg.output", 'w') as output_graph_file:
             output_graph_file.write("")
+
+        print("Preparation done")
 
 
 def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
@@ -133,6 +135,8 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
         # Save heap size (bytes) in file for eval
         with open(experiment_data_set_path + "/" + single_set_name + "/heap_size.txt", 'w') as heap_size_file:
             heap_size_file.write(str(heap_stats.size))
+
+        print("Mining done")
 
 
 def run_subdue_python(experiment_path, graph_file):
@@ -204,7 +208,7 @@ def compute_threshold(aids_file_path):
     return math.ceil(relative_threshold * number_of_components)
 
 
-def experiment_evaluation(experiment_path, experiment_folder_prefix=experiment_folder_prefix):
+def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
     print("########################################")
     print("### Evaluation")
     print("########################################")
@@ -234,14 +238,16 @@ def experiment_evaluation(experiment_path, experiment_folder_prefix=experiment_f
 
         # Start evaluation script
         # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, False, False, True, experiment_path, heap_size)
+        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path, heap_size, algorithm)
+
+        print("Evaluation done")
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 4:
         experiment_path = sys.argv[1]
         algorithm = sys.argv[2]
-        exp_folder_prefix =  sys.argv[3]
+        exp_folder_prefix = sys.argv[3]
     else:
         experiment_path = experiment_0_path
         algorithm = "gaston"

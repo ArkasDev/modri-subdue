@@ -17,7 +17,7 @@ experiment_path = None
 print_results_bool = None
 
 
-def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
+def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     # parameters
     global data_set_path
     global experiment_path
@@ -33,6 +33,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
     is_evaluation = arg6
     print_results_bool = arg7
     experiment_path = arg8
+    algorithm = arg10
 
     print(colored("Evaluation Settings:", 'yellow'))
     print(colored("set_name: " + str(data_set_path), 'yellow'))
@@ -65,42 +66,51 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
     nb_components = len(components)
     print("{} components in total.", nb_components)
 
-    # Import the frequent trees dict with key=freq and value = dict with key=size and value = list of trees with freq and size
-    print("Loading graphs from file...")
-    graphs = import_tlv(data_set_path + "/fsg.output")
+    sorted_recommendation_pruned = None
+    sorted_recommendation_pruned_f = None
+    if (algorithm == "gaston") or (algorithm == "gspan"):
 
-    # sort for compression (first freq then compression)
-    graphs_compression = {k: v for k, v in sorted(graphs.items(), key=lambda item: item[1], reverse=True)}
-    graphs_compression = {k: (v - 1) * (len(k.nodes()) + len(k.edges())) for k, v in
-                          sorted(graphs_compression.items(),
-                                 key=lambda item: (item[1] - 1) * (len(item[0].nodes()) + len(item[0].edges())),
-                                 reverse=True)}
-    # sort for size and frequency (first compression then frequency)
-    graphs_frequency = {k: v for k, v in
-                        sorted(graphs.items(), key=lambda item: len(item[0].nodes()) + len(item[0].edges()),
-                               reverse=True)}
-    graphs_frequency = {k: v for k, v in sorted(graphs_frequency.items(), key=lambda item: item[1], reverse=True)}
+        # Import the frequent trees dict with key=freq and value = dict with key=size and value = list of trees with freq and size
+        print("Loading graphs from file...")
+        graphs = import_tlv(data_set_path + "/fsg.output")
 
-    # compression based
-    sg_lattice = create_subgraph_lattice(graphs_compression)
-    sorted_recommendation_pruned, lattice_pruned = lattice_pruned_list_sorted(sg_lattice, best_compression,
-                                                                              compression_key)
+        print("Sorting for compression...")
+        # sort for compression (first freq then compression)
+        graphs_compression = {k: v for k, v in sorted(graphs.items(), key=lambda item: item[1], reverse=True)}
+        graphs_compression = {k: (v - 1) * (len(k.nodes()) + len(k.edges())) for k, v in
+                              sorted(graphs_compression.items(),
+                                     key=lambda item: (item[1] - 1) * (len(item[0].nodes()) + len(item[0].edges())),
+                                     reverse=True)}
 
-    # frequency based
-    sg_lattice_f = create_subgraph_lattice(graphs_frequency)
-    sorted_recommendation_pruned_f, lattice_pruned_f = lattice_pruned_list_sorted(sg_lattice_f, best_frequency,
-                                                                                  frequency_key)
+        print("Sorting for frequency...")
+        # sort for size and frequency (first compression then frequency)
+        graphs_frequency = {k: v for k, v in
+                            sorted(graphs.items(), key=lambda item: len(item[0].nodes()) + len(item[0].edges()),
+                                   reverse=True)}
+        graphs_frequency = {k: v for k, v in sorted(graphs_frequency.items(), key=lambda item: item[1], reverse=True)}
 
-    ################################## PRINT GRAPHS ############################################
-    # print as dictionary parent with children
-    print_results(lattice_pruned, sg_lattice, 10, lambda element: compression_key(sg_lattice, element),
-                  10, label="compression", export_pickle=True)
-    print_results(lattice_pruned_f, sg_lattice, 10, lambda element: frequency_key(sg_lattice, element),
-                  10, label="frequency", export_pickle=True)
+        # compression based
+        print("Eval compression based...")
+        sg_lattice = create_subgraph_lattice(graphs_compression)
+        sorted_recommendation_pruned, lattice_pruned = lattice_pruned_list_sorted(sg_lattice, best_compression,
+                                                                                  compression_key)
 
-        # print as list
-        # print_results_list(sorted_recommendation_pruned, 15, label="compression")
-        # print_results_list(sorted_recommendation_pruned_f, 15, label="frequency")
+        # frequency based
+        print("Eval frequency based...")
+        sg_lattice_f = create_subgraph_lattice(graphs_frequency)
+        sorted_recommendation_pruned_f, lattice_pruned_f = lattice_pruned_list_sorted(sg_lattice_f, best_frequency,
+                                                                                      frequency_key)
+
+        ################################## PRINT GRAPHS ############################################
+        # print as dictionary parent with children
+        print_results(lattice_pruned, sg_lattice, 10, lambda element: compression_key(sg_lattice, element),
+                      10, label="compression", export_pickle=True)
+        print_results(lattice_pruned_f, sg_lattice, 10, lambda element: frequency_key(sg_lattice, element),
+                      10, label="frequency", export_pickle=True)
+
+            # print as list
+            # print_results_list(sorted_recommendation_pruned, 15, label="compression")
+            # print_results_list(sorted_recommendation_pruned_f, 15, label="frequency")
 
     ################################## EVALUATION ############################################
     if is_evaluation:
@@ -136,8 +146,13 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9):
                      str(size_at_threshold), str(cnt_exact_match_1), str(cnt_exact_match_2), str(elapsed_time), str(heap_size), score_1,
                      score_2])
 
-        evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
-        evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
+        if (algorithm == "gaston") or (algorithm == "gspan"):
+            evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
+            evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
+        else:
+            # Subdue TODO: add subdue recommendation
+            evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
+            evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
 
 
 # Plot graphs
@@ -407,4 +422,4 @@ def average(lst):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10])
