@@ -3,6 +3,8 @@ import pickle
 import re
 import sys
 import os
+import json
+
 import time
 import functools
 import matplotlib.pyplot as plt
@@ -37,7 +39,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     algorithm = arg10
 
     print(colored("Evaluation Settings:", 'yellow'))
-    print(colored("set_name: " + str(data_set_path), 'yellow'))
+    print(colored("dataset_path: " + str(data_set_path), 'yellow'))
     print(colored("threshold: " + str(threshold), 'yellow'))
     print(colored("max_n: " + str(max_n), 'yellow'))
     print(colored("elapsed_time: " + str(elapsed_time), 'yellow'))
@@ -118,6 +120,14 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
     ################################## EVALUATION ############################################
     if is_evaluation:
+
+        if algorithm == "subdue_python":
+            graph = []
+            nx_graph = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            graph.append(nx_graph)
+            plot_graphs(graph, data_set_path + "/subdue_pattern_graph")
+
+
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
         correct_graph_2 = pickle.load(open(experiment_path + "./correct_graph_2_networkx.p", "rb"))
@@ -178,7 +188,7 @@ def plot_graphs(S, file_path, labels=True):
             y_off = 0.02
             nx.draw_networkx_labels(S[i], pos={k: ([v[0], v[1] + y_off]) for k, v in pos.items()}, font_size=8,
                                     labels=node_labels)
-            # nx.draw_networkx_edge_labels(S[i], pos)
+            nx.draw_networkx_edge_labels(S[i], pos)
         else:
             nx.draw(S[i], pos, node_size=30)
 

@@ -68,3 +68,37 @@ def convert_node_link_graph_to_subdue_python_graph(input_file, output_file):
 
         # Add edge
         the_file.write(']\n')
+
+
+def convert_to_nx_graph(file):
+    json_file = json.load(open(file))
+    nodes = []
+    node_names = []
+    edges = []
+    edge_names = []
+
+    for json_dict in json_file:
+        for key, value in json_dict.items():
+            if key == 'vertex':
+                nodes.insert(int(value['id']), value['attributes']['label'])
+                node_names.insert(int(value['id']), value['id'])
+
+            if key == 'edge':
+                edges.insert(int(value['id']), [value['source'], value['target']])
+                edge_names.insert(int(value['id']), value['attributes']['label'])
+
+    graph = nx.Graph()
+
+    # Add nodes to nx graph
+    i = 0
+    for node in node_names:
+        graph.add_node(node, label=nodes[i])
+        i = i + 1
+
+    # Add edges to nx graph
+    i = 0
+    for edge in edges:
+        graph.add_edge(edge[0], edge[1], lable=edge_names[i])
+        i = i + 1
+
+    return graph
