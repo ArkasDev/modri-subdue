@@ -5,6 +5,7 @@
 import os
 import sys
 import math
+import pickle
 import time
 import experiment.script.eval as evaluation
 import experiment.script.compute_components as compute
@@ -68,6 +69,16 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
         # Create empty output graph file so that after the mining phase of each single data set the output graph can be written
         with open(experiment_data_set_path + "/" + single_set_name + "/fsg.output", 'w') as output_graph_file:
             output_graph_file.write("")
+
+        # Plot correct graphs
+        graph = []
+        correct_graph_1 = pickle.load(open(experiment_data_set_path + "/correct_graph_networkx.p", "rb"))
+        graph.append(correct_graph_1)
+        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph")
+        graph = []
+        correct_graph_2 = pickle.load(open(experiment_data_set_path + "/correct_graph_2_networkx.p", "rb"))
+        graph.append(correct_graph_2)
+        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph_2")
 
         print("Preparation done")
 
@@ -145,7 +156,8 @@ def run_subdue_python(experiment_path, graph_file):
 
     # Subdue parameters
     parameters = Parameters.Parameters()
-    parameters.outputFileName = experiment_path + "/subgraph_python.output"
+    parameters.experimentFolder = experiment_path
+    parameters.outputFileName = experiment_path + "/subdue_python.output"
     parameters.beamWidth = 4
     parameters.iterations = 1
     parameters.limit = 7
@@ -155,9 +167,9 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.overlap = 'none'
     parameters.prune = False
     parameters.valueBased = False
-    parameters.writeCompressed = False
-    parameters.writePattern = False
-    parameters.writeInstances = False
+    parameters.writeCompressed = True
+    parameters.writePattern = True
+    parameters.writeInstances = True
     parameters.temporal = False
     parameters.print()
     parameters.set_defaults_for_graph(graph)

@@ -10,6 +10,7 @@ import networkx as nx
 from experiment.script.algos import most_frequent_induced_subgraphs_compression_based, most_frequent_induced_subgraphs, \
     find_induced_subgraph_hops, is_subgraph, is_subgraph_mono, is_label_isomorphic
 from experiment.script.compute_components import load_components_networkx
+import experiment.script.converter as converter
 from termcolor import colored
 
 data_set_path = None
@@ -68,8 +69,8 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
     sorted_recommendation_pruned = None
     sorted_recommendation_pruned_f = None
-    if (algorithm == "gaston") or (algorithm == "gspan"):
 
+    if (algorithm == "gaston") or (algorithm == "gspan"):
         # Import the frequent trees dict with key=freq and value = dict with key=size and value = list of trees with freq and size
         print("Loading graphs from file...")
         graphs = import_tlv(data_set_path + "/fsg.output")
@@ -108,6 +109,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         print_results(lattice_pruned_f, sg_lattice, 10, lambda element: frequency_key(sg_lattice, element),
                       10, label="frequency", export_pickle=True)
 
+    else:
+        print("Skip compression and frequency computation for subdue")
+
             # print as list
             # print_results_list(sorted_recommendation_pruned, 15, label="compression")
             # print_results_list(sorted_recommendation_pruned_f, 15, label="frequency")
@@ -117,6 +121,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
         correct_graph_2 = pickle.load(open(experiment_path + "./correct_graph_2_networkx.p", "rb"))
+
+        if correct_graph_1 is None or correct_graph_2 is None:
+            print(colored("Error: correct graph could not be loaded", "red"))
 
         def evaluate_candidates(output_file, candidates, label):
             score_1 = get_position_sorted_list(correct_graph_1, candidates)
@@ -149,10 +156,12 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         if (algorithm == "gaston") or (algorithm == "gspan"):
             evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
-        else:
-            # Subdue TODO: add subdue recommendation
+        elif algorithm == "subdue_python":
+            # convert subdue best pattern to nx graph
+            # with open(experiment_path + "/" + set_name + "/threshold.txt", 'r') as threshold_file:
+            #     threshold = threshold_file.read()
+            # graphs = converter.create_nx_graph_for_subdue_python_output()
             evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
-            evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
 
 
 # Plot graphs
@@ -325,13 +334,14 @@ def best_frequency(lattice):
     return best_pruned_using_sorting(lattice, lambda item: item[1][1], reverse=True)
 
 
-def print_single(lattice, graph, label, export_pickle=False):
+def print_single(lattice, graph, label, label_draw, export_pickle=False):
     if print_results_bool:
         print("Frequency: " + str(lattice[graph][1]))
         print("Compression: " + str(lattice[graph][0]))
     file_path = data_set_path + '/results/' + label
+    file_path_drawing = data_set_path + '/results/' + label_draw
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    plot_graphs([graph], file_path)
+    plot_graphs([graph], file_path_drawing)
     if export_pickle:
         pickle.dump(graph, open(file_path + ".p", "wb"))
 
@@ -345,13 +355,13 @@ def print_results(pruned_lattice, original_lattice, top_k, good_children_sorting
             break
         if print_results_bool:
             print("-----------LEADING GRAPH------------------")
-            print_single(original_lattice, key, label + "/" + str(position) + ":0", export_pickle=export_pickle)
+            print_single(original_lattice, key, label + "/" + str(position) + ":0", label + "/" + str(position) + "_0", export_pickle=export_pickle)
             print("-----------Good children:----------------")
         # get the "good children" and sort them
         value.sort(key=good_children_sorting, reverse=True)
         child_position = 1
         for child in value[:max_good_children]:
-            print_single(original_lattice, child, label + "/" + str(position) + ":" + str(child_position),
+            print_single(original_lattice, child, label + "/" + str(position) + ":" + str(child_position), label + "/" + str(position) + "_" + str(child_position),
                          export_pickle=export_pickle)
             child_position += 1
         position += 1
@@ -387,6 +397,14 @@ def get_position(graph, lattice, good_children_sorting):
 
 # Get the position of the correct in the total list of graphs
 def get_position_sorted_list(correct, sorted_list):
+    if correct is None:
+        print(colored("Error: correct graph is not set", "red"))
+        return
+
+    if sorted_list is None:
+        print(colored("Error: sorted list of graphs mined by subgraph mining is not set", "red"))
+        return
+
     position = 1
     for graph in sorted_list:
         if is_label_isomorphic(correct, graph, "label"):
