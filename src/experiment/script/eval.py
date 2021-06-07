@@ -123,8 +123,8 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
         if algorithm == "subdue_python":
             graph = []
-            nx_graph = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
-            graph.append(nx_graph)
+            pattern = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            graph.append(pattern)
             plot_graphs(graph, data_set_path + "/subdue_pattern_graph")
 
 
@@ -168,10 +168,8 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python":
             # convert subdue best pattern to nx graph
-            # with open(experiment_path + "/" + set_name + "/threshold.txt", 'r') as threshold_file:
-            #     threshold = threshold_file.read()
-            # graphs = converter.create_nx_graph_for_subdue_python_output()
-            evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
+            pattern = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
 
 
 # Plot graphs
