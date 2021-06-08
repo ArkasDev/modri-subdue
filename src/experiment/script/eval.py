@@ -176,6 +176,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             # convert subdue best pattern to nx graph
             pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
+        elif algorithm == "subdue_c":
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
+            evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
 
 
 # Plot graphs
