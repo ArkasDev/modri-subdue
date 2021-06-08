@@ -123,10 +123,16 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
         if algorithm == "subdue_python":
             graph = []
-            pattern = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
             graph.append(pattern)
             plot_graphs(graph, data_set_path + "/subdue_pattern_graph")
 
+        if algorithm == "subdue_c":
+            graph = []
+            converter.export_node_link_graph_from_subdue_c_graph(data_set_path + "/subdue_c_output.g", data_set_path + "/subdue_c_output.json")
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
+            graph.append(pattern)
+            plot_graphs(graph, data_set_path + "/subdue_c_output_graph")
 
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
@@ -168,7 +174,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python":
             # convert subdue best pattern to nx graph
-            pattern = converter.convert_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
 
 

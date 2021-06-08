@@ -28,14 +28,12 @@ class Pattern:
             instance.print_instance(instanceNum, tab+'  ')
             instanceNum += 1
     
-    def write_instances_to_file(self, outputFileName, outputDir=""):
+    def write_instances_to_file(self, outputFileName):
         """Write instances of pattern to given file name in JSON format."""
         outputFile = open(outputFileName, 'w')
         outputFile.write('[\n')
         firstOne = True
-        instancesCounter = 0
         for instance in self.instances:
-            instancesCounter = instancesCounter + 1
             if firstOne:
                 firstOne = False
             else:
@@ -43,11 +41,6 @@ class Pattern:
             instance.write_to_file(outputFile)
         outputFile.write('\n]\n')
         outputFile.close()
-
-        if outputDir != "":
-            with open(outputDir + "/subdue_count_instances.txt", 'w') as instances_file:
-                instances_file.write("# Pattern 1 \n")
-                instances_file.write(str(instancesCounter) + "\n")
 
 class Instance:
     

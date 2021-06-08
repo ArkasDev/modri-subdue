@@ -91,7 +91,7 @@ def subdue(parameters, graph):
                 pattern_list[0].definition.write_to_file(outputFileName)
             if (parameters.writeInstances):
                 outputFileName = parameters.outputFileName + "-instances-" + str(iteration) + ".json"
-                pattern_list[0].write_instances_to_file(outputFileName, parameters.experimentFolder)
+                pattern_list[0].write_instances_to_file(outputFileName)
             if ((iteration < parameters.iterations) or (parameters.writeCompressed)):
                 graph.Compress(iteration, pattern_list[0])
             if (iteration < parameters.iterations):

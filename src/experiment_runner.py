@@ -11,6 +11,7 @@ import experiment.script.eval as evaluation
 import experiment.script.compute_components as compute
 import subdue_c.subdue_c as subdue_c
 from subdue_python import Subdue, Parameters
+from subdue_c import parameters_subdue_c
 from guppy import hpy
 from parsemis.parsemis import ParsemisMiner
 
@@ -123,7 +124,7 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
         if algorithm == "subdue_c":
             graph = experiment_data_set_path + "/%s/connected_components.g" % single_set_name
             # Run C Subdue
-            run_subdue_c(experiment_data_set_path + "/" + single_set_name, graph)
+            run_subdue_c(experiment_data_set_path + "/" + single_set_name)
         if algorithm == "modri_subdue":
             # Load the aggregated graph of all diffs of this single data set
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
@@ -179,8 +180,21 @@ def run_subdue_python(experiment_path, graph_file):
     return
 
 
-def run_subdue_c(experiment_path, graph):
-    subdue_c.run()
+def run_subdue_c(experiment_path):
+    parameters = parameters_subdue_c.ParametersSubdueC()
+    parameters.experimentFolder = experiment_path
+    parameters.outputFileName = experiment_path + "/subdue_c_output.g"
+    parameters.beamWidth = 4
+    parameters.iterations = 1
+    parameters.limit = 7
+    parameters.maxSize = 7
+    parameters.minSize = 1
+    parameters.numBest = 1
+    parameters.overlap = False
+    parameters.prune = False
+    parameters.valueBased = False
+
+    subdue_c.run(parameters)
     return
 
 

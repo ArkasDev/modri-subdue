@@ -25,7 +25,6 @@ class Parameters:
         self.writePattern = False     # Write best pattern at iteration i to file outputFileName-pattern-i.json
         self.writeInstances = False   # Write instances of best pattern at iteration i as one graph to file outputFileName-instances-i.json
         self.temporal = False         # Discover static (False) or temporal (True) patterns
-        self.experimentFolder = ""
     
     def set_parameters (self, args):
         """Set parameters according to given command-line args list."""
@@ -92,9 +91,8 @@ class Parameters:
         print("  Write Compressed: " + str(self.writeCompressed))
         print("  Write Pattern: " + str(self.writePattern))
         print("  Write Instances: " + str(self.writeInstances))
-        print("  Temporal: " + str(self.temporal))
-        print("  Experiment Folder: " + str(self.experimentFolder) + "\n")
-
+        print("  Temporal: " + str(self.temporal) + "\n")
+        
     def set_defaults_for_graph(self, graph):
         if (self.limit == 0):
             self.limit = int(len(graph.edges) / 2)

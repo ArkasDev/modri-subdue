@@ -54,7 +54,25 @@ def export_aids(graph_db, path):
 
 
 def export_subdue_c_graph(graph_db, path):
-    return
+    with open(path, 'w') as output_graph_file:
+        last_node_id_from_last_graph = 1
+        last_edge_id_from_last_graph = 1
+
+        for i, graph in enumerate(graph_db):
+            temp_graph = nx.convert_node_labels_to_integers(graph, first_label=0)
+            vertices = temp_graph.nodes(data=True)
+            edges = temp_graph.edges(data=True)
+
+            starting_node_id_from_current_graph = last_node_id_from_last_graph
+
+            for n, node in enumerate(vertices):
+                output_graph_file.write('v ' + str(last_node_id_from_last_graph + n) + ' ' + node[1]['label'] + '\n')
+                # Last edge
+                if n == len(vertices) - 1:
+                    last_node_id_from_last_graph = last_node_id_from_last_graph + n + 1
+
+            for j, edge in enumerate(edges):
+                output_graph_file.write('u ' + str(edge[0] + starting_node_id_from_current_graph) + ' ' + str(edge[1] + starting_node_id_from_current_graph) + ' ' + str(edge[2]['label']) + '\n')
 
 
 def export_subdue_python_json(graph_db, path):
@@ -155,7 +173,7 @@ def main(args):
     set_name = args
     # Load components
     components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
-    # Export in TLV
+    # Exports
     export_TLV(components, set_name + '/connected_components.lg')
     export_aids(components, set_name + '/connected_components.aids')
     export_subdue_c_graph(components, set_name + '/connected_components.g')

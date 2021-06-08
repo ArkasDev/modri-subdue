@@ -1,6 +1,6 @@
 import networkx as nx
 import json
-
+import os
 
 def convert_node_link_graph_to_parsemis_directed_graph(input_file, output_file):
     """
@@ -70,7 +70,39 @@ def convert_node_link_graph_to_subdue_python_graph(input_file, output_file):
         the_file.write(']\n')
 
 
-def convert_to_nx_graph(file):
+def export_node_link_graph_from_subdue_c_graph(input_file, output_file):
+    with open(output_file, 'w') as output:
+        output.write("[\n")
+
+        with open(input_file, "r") as input_g:
+            edge_id = 1
+            for line in input_g.readlines():
+                if line.startswith("v"):
+                    elements = line.split(" ")
+                    label_without_linebreak = elements[2].split("\n")
+                    output.write('  {"vertex": {\n')
+                    output.write('    "id": "' + elements[1] + '",\n')
+                    output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
+                if line.startswith("u"):
+                    elements = line.split(" ")
+                    label_without_linebreak = elements[3].split("\n")
+                    output.write('  {"edge": {\n')
+                    output.write('    "id": "' + str(edge_id) + '",\n')
+                    output.write('    "source": "' + elements[1] + '",\n')
+                    output.write('    "target": "' + elements[2] + '",\n')
+                    output.write('    "directed": "false",\n')
+                    output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
+                    edge_id = edge_id + 1
+        output.write("]")
+
+    with open(output_file, 'rb+') as remove_last_comma_handler:
+        remove_last_comma_handler.seek(-4, 2)
+        remove_last_comma_handler.truncate()
+    with open(output_file, "a") as add_last_bracket_handler:
+        add_last_bracket_handler.write("\n]")
+
+
+def convert_node_link_graph_to_nx_graph(file):
     json_file = json.load(open(file))
     nodes = []
     node_names = []
