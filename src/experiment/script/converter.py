@@ -71,35 +71,42 @@ def convert_node_link_graph_to_subdue_python_graph(input_file, output_file):
 
 
 def export_node_link_graph_from_subdue_c_graph(input_file, output_file):
+    empty_input = False
     with open(output_file, 'w') as output:
         output.write("[\n")
 
-        with open(input_file, "r") as input_g:
-            edge_id = 1
-            for line in input_g.readlines():
-                if line.startswith("v"):
-                    elements = line.split(" ")
-                    label_without_linebreak = elements[2].split("\n")
-                    output.write('  {"vertex": {\n')
-                    output.write('    "id": "' + elements[1] + '",\n')
-                    output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
-                if line.startswith("u"):
-                    elements = line.split(" ")
-                    label_without_linebreak = elements[3].split("\n")
-                    output.write('  {"edge": {\n')
-                    output.write('    "id": "' + str(edge_id) + '",\n')
-                    output.write('    "source": "' + elements[1] + '",\n')
-                    output.write('    "target": "' + elements[2] + '",\n')
-                    output.write('    "directed": "false",\n')
-                    output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
-                    edge_id = edge_id + 1
+        with open(input_file, "r") as check_empty:
+            if check_empty.readline() == "":
+                empty_input = True
+
+        if empty_input is False:
+            with open(input_file, "r") as input_g:
+                edge_id = 1
+                for line in input_g.readlines():
+                    if line.startswith("v"):
+                        elements = line.split(" ")
+                        label_without_linebreak = elements[2].split("\n")
+                        output.write('  {"vertex": {\n')
+                        output.write('    "id": "' + elements[1] + '",\n')
+                        output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
+                    if line.startswith("u"):
+                        elements = line.split(" ")
+                        label_without_linebreak = elements[3].split("\n")
+                        output.write('  {"edge": {\n')
+                        output.write('    "id": "' + str(edge_id) + '",\n')
+                        output.write('    "source": "' + elements[1] + '",\n')
+                        output.write('    "target": "' + elements[2] + '",\n')
+                        output.write('    "directed": "false",\n')
+                        output.write('    "attributes": {"label": "' + label_without_linebreak[0] + '"}}},\n')
+                        edge_id = edge_id + 1
         output.write("]")
 
-    with open(output_file, 'rb+') as remove_last_comma_handler:
-        remove_last_comma_handler.seek(-4, 2)
-        remove_last_comma_handler.truncate()
-    with open(output_file, "a") as add_last_bracket_handler:
-        add_last_bracket_handler.write("\n]")
+    if empty_input is False:
+        with open(output_file, 'rb+') as remove_last_comma_handler:
+            remove_last_comma_handler.seek(-4, 2)
+            remove_last_comma_handler.truncate()
+        with open(output_file, "a") as add_last_bracket_handler:
+            add_last_bracket_handler.write("\n]")
 
 
 def convert_node_link_graph_to_nx_graph(file):
@@ -130,7 +137,7 @@ def convert_node_link_graph_to_nx_graph(file):
     # Add edges to nx graph
     i = 0
     for edge in edges:
-        graph.add_edge(edge[0], edge[1], lable=edge_names[i])
+        graph.add_edge(edge[0], edge[1], label=edge_names[i])
         i = i + 1
 
     return graph

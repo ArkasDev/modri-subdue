@@ -14,6 +14,7 @@ from subdue_python import Subdue, Parameters
 from subdue_c import parameters_subdue_c
 from guppy import hpy
 from parsemis.parsemis import ParsemisMiner
+import experiment.script.converter as converter
 
 # My local experiment folder paths
 experiment_folder_prefix = "SingleEO"
@@ -49,6 +50,8 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
     print("### Experiment preparation ")
     print("########################################")
 
+    print("Preparation running...")
+
     # Loop through all single data sets in the experiment folder
     for single_set_name in os.listdir(experiment_data_set_path):
 
@@ -81,13 +84,15 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
         graph.append(correct_graph_2)
         evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph_2")
 
-        print("Preparation done")
+    print("Preparation done")
 
 
 def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
     print("########################################")
     print("### Graph mining")
     print("########################################")
+
+    print("Mining running...")
 
     # Loop through all single data sets in the experiment folder
     for single_set_name in os.listdir(experiment_data_set_path):
@@ -148,7 +153,7 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
         with open(experiment_data_set_path + "/" + single_set_name + "/heap_size.txt", 'w') as heap_size_file:
             heap_size_file.write(str(heap_stats.size))
 
-        print("Mining done")
+    print("Mining done")
 
 
 def run_subdue_python(experiment_path, graph_file):
@@ -159,16 +164,19 @@ def run_subdue_python(experiment_path, graph_file):
     parameters = Parameters.Parameters()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
+
     parameters.beamWidth = 4
     parameters.iterations = 1
-    parameters.limit = 7
-    parameters.maxSize = 7
+    parameters.limit = 50
+    parameters.maxSize = 50
     parameters.minSize = 1
     parameters.numBest = 1
-    parameters.overlap = 'none'
+    parameters.overlap = 'vertex'
+
     parameters.prune = False
     parameters.valueBased = False
-    parameters.writeCompressed = True
+
+    parameters.writeCompressed = False
     parameters.writePattern = True
     parameters.writeInstances = True
     parameters.temporal = False
@@ -184,13 +192,17 @@ def run_subdue_c(experiment_path):
     parameters = parameters_subdue_c.ParametersSubdueC()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_c_output.g"
+    parameters.graphPath = experiment_path + "/connected_components.g"
+    parameters.subdue_lib_windows_location = "..\\lib\\subdue_c\\bin\\subdue.exe"
+
     parameters.beamWidth = 4
     parameters.iterations = 1
-    parameters.limit = 7
-    parameters.maxSize = 7
+    parameters.limit = 50
+    parameters.maxSize = 50
     parameters.minSize = 1
     parameters.numBest = 1
-    parameters.overlap = False
+    parameters.overlap = True
+
     parameters.prune = False
     parameters.valueBased = False
 
@@ -239,6 +251,8 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
     print("### Evaluation")
     print("########################################")
 
+    print("Evaluation running...")
+
     # Remove old evaluation files and create new empty files
     os.remove(experiment_path + "/stats_topn.csv")
     os.remove(experiment_path + "/stats_topn_frequency.csv")
@@ -266,7 +280,7 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
         # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
         evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path, heap_size, algorithm)
 
-        print("Evaluation done")
+    print("Evaluation done")
 
 
 if __name__ == "__main__":
@@ -274,9 +288,25 @@ if __name__ == "__main__":
         experiment_path = sys.argv[1]
         algorithm = sys.argv[2]
         exp_folder_prefix = sys.argv[3]
+    # else:
+    #     experiment_path = "../data/experiment_subdue_pilot_test_1"
+    #     algorithm = "subdue_python"
+    #     exp_folder_prefix = experiment_folder_prefix
+    # run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
+    #                skip_preparation=False, skip_mining=False, skip_evaluation=False)
+
     else:
-        experiment_path = experiment_0_path
-        algorithm = "gaston"
+        experiment_path = "../data/experiment_subdue_pilot_test_1"
+        algorithm = "subdue_c"
         exp_folder_prefix = experiment_folder_prefix
     run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
-                   skip_preparation=False, skip_mining=False, skip_evaluation=False)
+                   skip_preparation=True, skip_mining=False, skip_evaluation=False)
+    #
+    # else:
+    #     experiment_path = "../data/experiment_subdue_pilot"
+    #     algorithm = "gaston"
+    #     exp_folder_prefix = experiment_folder_prefix
+    # run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
+    #                skip_preparation=True, skip_mining=False, skip_evaluation=False)
+
+

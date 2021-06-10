@@ -1,0 +1,116 @@
+[
+  {
+    "vertex": {
+      "id": "1",
+      "attributes": {
+        "label": "A"
+      }
+    }
+  },
+  {
+    "vertex": {
+      "id": "2",
+      "attributes": {
+        "label": "B"
+      }
+    }
+  },
+  {
+    "vertex": {
+      "id": "3",
+      "attributes": {
+        "label": "C"
+      }
+    }
+  },
+  {
+    "vertex": {
+      "id": "4",
+      "attributes": {
+        "label": "E"
+      }
+    }
+  },
+  {
+    "vertex": {
+      "id": "5",
+      "attributes": {
+        "label": "B"
+      }
+    }
+  },
+  {
+    "vertex": {
+      "id": "6",
+      "attributes": {
+        "label": "E"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "1",
+      "source": "1",
+      "target": "2",
+      "directed": "false",
+      "attributes": {
+        "label": "c"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "2",
+      "source": "2",
+      "target": "3",
+      "directed": "false",
+      "attributes": {
+        "label": "c"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "3",
+      "source": "2",
+      "target": "4",
+      "directed": "false",
+      "attributes": {
+        "label": "a"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "4",
+      "source": "3",
+      "target": "5",
+      "directed": "false",
+      "attributes": {
+        "label": "b"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "5",
+      "source": "4",
+      "target": "6",
+      "directed": "false",
+      "attributes": {
+        "label": "b"
+      }
+    }
+  },
+  {
+    "edge": {
+      "id": "6",
+      "source": "5",
+      "target": "6",
+      "directed": "false",
+      "attributes": {
+        "label": "a"
+      }
+    }
+  }
+]

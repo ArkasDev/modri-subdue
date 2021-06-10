@@ -45,7 +45,7 @@ class Pattern:
         outputFile.close()
 
         if outputDir != "":
-            with open(outputDir + "/subdue_count_instances.txt", 'w') as instances_file:
+            with open(outputDir + "/subdue_python_count_instances.txt", 'w') as instances_file:
                 instances_file.write("# Pattern 1 \n")
                 instances_file.write(str(instancesCounter) + "\n")
 

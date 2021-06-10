@@ -131,8 +131,12 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             graph = []
             converter.export_node_link_graph_from_subdue_c_graph(data_set_path + "/subdue_c_output.g", data_set_path + "/subdue_c_output.json")
             pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
-            graph.append(pattern)
-            plot_graphs(graph, data_set_path + "/subdue_c_output_graph")
+
+            if pattern is not None:
+                graph.append(pattern)
+                plot_graphs(graph, data_set_path + "/subdue_c_output_graph")
+            else:
+                print(colored("No pattern found, skip plotting", "red"))
 
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
@@ -173,7 +177,6 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python":
-            # convert subdue best pattern to nx graph
             pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
         elif algorithm == "subdue_c":
@@ -186,18 +189,18 @@ def plot_graphs(S, file_path, labels=True):
     for i in range(len(S)):
         plt.clf()
         plt.figure(i)
-        plt.margins(0.15, 0.15)
-        pos = nx.spring_layout(S[i], scale=10)
+        plt.margins(0.05, 0.05)
+        pos = nx.spring_layout(S[i], scale=3)
 
         if labels:
-            nx.draw(S[i], pos, node_size=1500)
+            nx.draw(S[i], pos, node_size=500)
             node_labels = dict([(v, d['label']) for v, d in S[i].nodes(data=True)])
             y_off = 0.02
-            nx.draw_networkx_labels(S[i], pos={k: ([v[0], v[1] + y_off]) for k, v in pos.items()}, font_size=8,
+            nx.draw_networkx_labels(S[i], pos={k: ([v[0], v[1] + y_off]) for k, v in pos.items()}, font_size=6,
                                     labels=node_labels)
-            nx.draw_networkx_edge_labels(S[i], pos)
+            nx.draw_networkx_edge_labels(S[i], pos, font_size=6)
         else:
-            nx.draw(S[i], pos, node_size=30)
+            nx.draw(S[i], pos, node_size=20)
 
         if len(S) > 1:
             save_path = file_path + "_" + str(i) + ".png"

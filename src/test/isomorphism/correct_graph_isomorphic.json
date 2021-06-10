@@ -1,0 +1,65 @@
+[
+  {"vertex": {
+    "id": "0",
+    "attributes": {"label": "Add_Connector"}}},
+  {"vertex": {
+    "id": "6",
+    "attributes": {"label": "Add_Requirement"}}},
+  {"vertex": {
+    "id": "2",
+    "attributes": {"label": "Add_Port"}}},
+  {"vertex": {
+    "id": "3",
+    "attributes": {"label": "Add_Port"}}},
+  {"vertex": {
+    "id": "4",
+    "attributes": {"label": "Preserve_Component"}}},
+  {"vertex": {
+    "id": "5",
+    "attributes": {"label": "Preserve_Component"}}},
+  {"vertex": {
+    "id": "1",
+    "attributes": {"label": "Preserve_Package"}}},
+  {"edge": {
+    "id": "1",
+    "source": "0",
+    "target": "2",
+    "directed": "false",
+    "attributes": {"label": "Add_src"}}},
+  {"edge": {
+    "id": "0",
+    "source": "0",
+    "target": "3",
+    "directed": "false",
+    "attributes": {"label": "Add_tgt"}}},
+  {"edge": {
+    "id": "2",
+    "source": "2",
+    "target": "4",
+    "directed": "false",
+    "attributes": {"label": "Add_port"}}},
+  {"edge": {
+    "id": "3",
+    "source": "3",
+    "target": "5",
+    "directed": "false",
+    "attributes": {"label": "Add_port"}}},
+  {"edge": {
+    "id": "4",
+    "source": "0",
+    "target": "6",
+    "directed": "false",
+    "attributes": {"label": "Add_requirement"}}},
+  {"edge": {
+    "id": "6",
+    "source": "0",
+    "target": "1",
+    "directed": "false",
+    "attributes": {"label": "Add_connector"}}},
+  {"edge": {
+    "id": "5",
+    "source": "6",
+    "target": "1",
+    "directed": "false",
+    "attributes": {"label": "Add_requirement"}}}
+]

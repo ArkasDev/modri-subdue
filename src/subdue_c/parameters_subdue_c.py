@@ -12,3 +12,5 @@ class ParametersSubdueC:
         self.prune = False            # Remove any patterns that are worse than their parent.
         self.valueBased = False       # Retain all patterns with the top beam best values.
         self.experimentFolder = ""
+        self.graphPath = ""
+        self.subdue_lib_windows_location = ""

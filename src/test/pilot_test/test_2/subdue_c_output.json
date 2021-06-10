@@ -1,0 +1,14 @@
+[
+  {"vertex": {
+    "id": "1",
+    "attributes": {"label": "B"}}},
+  {"vertex": {
+    "id": "2",
+    "attributes": {"label": "E"}}},
+  {"edge": {
+    "id": "1",
+    "source": "1",
+    "target": "2",
+    "directed": "false",
+    "attributes": {"label": "a"}}}
+]

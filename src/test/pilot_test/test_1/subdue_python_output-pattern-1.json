@@ -1,0 +1,17 @@
+[
+  {"vertex": {
+     "id": "1",
+     "attributes": {"label": "B"},
+     "timestamp": "0"}},
+  {"vertex": {
+     "id": "2",
+     "attributes": {"label": "E"},
+     "timestamp": "0"}},
+  {"edge": {
+     "id": "1",
+     "source": "1",
+     "target": "2",
+     "attributes": {"label": "a"},
+     "directed": "false",
+     "timestamp": "0"}}
+]
