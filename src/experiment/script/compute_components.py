@@ -94,7 +94,7 @@ def export_subdue_python_json(graph_db, path):
                 output_graph_file.write('    "attributes": {"label": "' + node[1]['label'] + '"}}},\n')
                 # Last edge
                 if n == len(vertices) - 1:
-                    last_node_id_from_last_graph = last_node_id_from_last_graph + n
+                    last_node_id_from_last_graph = last_node_id_from_last_graph + n + 1
 
             for j, edge in enumerate(edges):
                 output_graph_file.write('  {"edge": {\n')
@@ -105,7 +105,7 @@ def export_subdue_python_json(graph_db, path):
 
                 # Check for the last edge
                 if j == len(edges) - 1:
-                    last_edge_id_from_last_graph = last_edge_id_from_last_graph + j
+                    last_edge_id_from_last_graph = last_edge_id_from_last_graph + j + 1
                     # Dont write a comma for the last attribute in the file
                     if len(graph_db) == i + 1:
                         output_graph_file.write('    "attributes": {"label": "' + str(edge[2]['label']) + '"}}}\n')
@@ -174,6 +174,7 @@ def main(args):
     # Load components
     components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
     # Exports
+    print("Export connected components")
     export_TLV(components, set_name + '/connected_components.lg')
     export_aids(components, set_name + '/connected_components.aids')
     export_subdue_c_graph(components, set_name + '/connected_components.g')
