@@ -72,6 +72,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     sorted_recommendation_pruned = None
     sorted_recommendation_pruned_f = None
 
+    # Part of the mining of gaston and gspan. Not necessary for subdue algorithms.
     if (algorithm == "gaston") or (algorithm == "gspan"):
         # Import the frequent trees dict with key=freq and value = dict with key=size and value = list of trees with freq and size
         print("Loading graphs from file...")
@@ -138,6 +139,12 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             else:
                 print(colored("No pattern found, skip plotting", "red"))
 
+        if algorithm == "subdue_python_1_1":
+            graph = []
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+            graph.append(pattern)
+            plot_graphs(graph, data_set_path + "/subdue_1_1_pattern_graph")
+
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
         correct_graph_2 = pickle.load(open(experiment_path + "./correct_graph_2_networkx.p", "rb"))
@@ -182,7 +189,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         elif algorithm == "subdue_c":
             pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
-
+        elif algorithm == "subdue_python_1_1":
+            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+            evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
 
 # Plot graphs
 def plot_graphs(S, file_path, labels=True):

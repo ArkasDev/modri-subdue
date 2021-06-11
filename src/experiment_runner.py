@@ -12,6 +12,7 @@ import experiment.script.compute_components as compute
 import subdue_c.subdue_c as subdue_c
 from subdue_python import Subdue, Parameters
 from subdue_c import parameters_subdue_c
+from subdue_python_1_1 import subdue_python_1_1
 from guppy import hpy
 from parsemis.parsemis import ParsemisMiner
 import experiment.script.converter as converter
@@ -22,11 +23,14 @@ experiment_0_path = "../data/experiment_0"
 experiment_1_path = "../data/experiment_1"
 experiment_2_path = "../data/experiment_2"
 
+python_v_2_7_path = "C:\\Python2716\\python.exe"
+
 # Relative threshold for the frequent subgraph mining algorithms
 relative_threshold = 0.4
 
 
-def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix, skip_preparation=True, skip_mining=False, skip_evaluation=False):
+def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix,
+                   skip_preparation=True, skip_mining=False, skip_evaluation=False):
     """
     :param experiment_data_set_path: Path to the experiment data set
     :param algorithm: Use an algorithm for graph mining the model repositories: gaston, gspan, subdue_c, subdue_python, modri_subdue
@@ -126,6 +130,11 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
             # Run Python Subdue
             run_subdue_python(experiment_data_set_path + "/" + single_set_name, graph)
+        if algorithm == "subdue_python_1_1":
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
+            # Run Python Subdue
+            run_subdue_python_1_1(experiment_data_set_path + "/" + single_set_name, graph)
         if algorithm == "subdue_c":
             graph = experiment_data_set_path + "/%s/connected_components.g" % single_set_name
             # Run C Subdue
@@ -165,11 +174,11 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 4
+    parameters.beamWidth = 8
     parameters.iterations = 1
-    parameters.limit = 50
-    parameters.maxSize = 50
-    parameters.minSize = 1
+    parameters.limit = 100
+    parameters.maxSize = 7
+    parameters.minSize = 7
     parameters.numBest = 1
     parameters.overlap = 'vertex'
 
@@ -183,9 +192,7 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.print()
     parameters.set_defaults_for_graph(graph)
 
-    # Run the Python Subdue implementation
     Subdue.subdue(parameters, graph)
-    return
 
 
 def run_subdue_c(experiment_path):
@@ -207,7 +214,27 @@ def run_subdue_c(experiment_path):
     parameters.valueBased = False
 
     subdue_c.run(parameters)
-    return
+
+
+def run_subdue_python_1_1(experiment_path, graph_file):
+    subdue_windows_location = "..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
+
+    parameters = Parameters.Parameters()
+    parameters.experimentFolder = experiment_path
+    parameters.outputFileName = experiment_path + "/subdue_python_1_1.output"
+    parameters.inputFileName = graph_file
+
+    parameters.beamWidth = 4
+    parameters.iterations = 1
+    parameters.limit = 50
+    parameters.maxSize = 50
+    parameters.minSize = 1
+    parameters.numBest = 1
+
+    parameters.prune = False
+    parameters.valueBased = False
+
+    subdue_python_1_1.run(python_v_2_7_path, subdue_windows_location, parameters)
 
 
 def run_modri_subdue(experiment_path, graph):
@@ -257,9 +284,11 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
     os.remove(experiment_path + "/stats_topn.csv")
     os.remove(experiment_path + "/stats_topn_frequency.csv")
     with open(experiment_path + "/stats_topn.csv", 'w') as stats_tpn:
-        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
+        stats_tpn.write(
+            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
     with open(experiment_path + "/stats_topn_frequency.csv", 'w') as stats_tpn:
-        stats_tpn.write('"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
+        stats_tpn.write(
+            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
 
     # Evaluate each experiment
     for set_name in os.listdir(experiment_path):
@@ -278,7 +307,8 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
 
         # Start evaluation script
         # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path, heap_size, algorithm)
+        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path,
+                        heap_size, algorithm)
 
     print("Evaluation done")
 
@@ -288,25 +318,10 @@ if __name__ == "__main__":
         experiment_path = sys.argv[1]
         algorithm = sys.argv[2]
         exp_folder_prefix = sys.argv[3]
-    # else:
-    #     experiment_path = "../data/experiment_subdue_pilot_test_1"
-    #     algorithm = "subdue_python"
-    #     exp_folder_prefix = experiment_folder_prefix
-    # run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
-    #                skip_preparation=False, skip_mining=False, skip_evaluation=False)
-
     else:
-        experiment_path = "../data/experiment_subdue_pilot_test_1"
-        algorithm = "subdue_c"
+        experiment_path = "../data/experiment_subdue_pilot"
+        algorithm = "gaston"
         exp_folder_prefix = experiment_folder_prefix
-    run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
-                   skip_preparation=True, skip_mining=False, skip_evaluation=False)
-    #
-    # else:
-    #     experiment_path = "../data/experiment_subdue_pilot"
-    #     algorithm = "gaston"
-    #     exp_folder_prefix = experiment_folder_prefix
-    # run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm, experiment_folder_prefix=exp_folder_prefix,
-    #                skip_preparation=True, skip_mining=False, skip_evaluation=False)
-
-
+        run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
+                       experiment_folder_prefix=exp_folder_prefix,
+                       skip_preparation=True, skip_mining=False, skip_evaluation=False)

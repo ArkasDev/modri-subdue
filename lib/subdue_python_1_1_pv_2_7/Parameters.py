@@ -2,7 +2,7 @@
 #
 # Written by Larry Holder (holder@wsu.edu).
 #
-# Copyright (c) 2017-2021. Washington State University.
+# Copyright (c) 2017-2018. Washington State University.
 
 import os
 
@@ -18,24 +18,18 @@ class Parameters:
         self.maxSize = 0              # Maximum size (#edges) of a pattern; default (0) is |E|/2.
         self.minSize = 1              # Minimum size (#edges) of a pattern; default is 1.
         self.numBest = 3              # Number of best patterns to report at end; default is 3.
-        self.overlap = "none"         # Extent that pattern instances can overlap (none, vertex, edge)
         self.prune = False            # Remove any patterns that are worse than their parent.
         self.valueBased = False       # Retain all patterns with the top beam best values.
         self.writeCompressed = False  # Write compressed graph after iteration i to file outputFileName-compressed-i.json
         self.writePattern = False     # Write best pattern at iteration i to file outputFileName-pattern-i.json
         self.writeInstances = False   # Write instances of best pattern at iteration i as one graph to file outputFileName-instances-i.json
         self.temporal = False         # Discover static (False) or temporal (True) patterns
-        self.experimentFolder = ""
     
     def set_parameters (self, args):
         """Set parameters according to given command-line args list."""
         self.inputFileName = args[-1]
         filename, file_extension = os.path.splitext(self.inputFileName)
-        if (file_extension == '.json'):
-            self.outputFileName = filename
-        else:
-            self.outputFileName = self.inputFileName
-        print("Output file: " + self.outputFileName)
+        split = filename.split("/")
         index = 1
         numArgs = len(args)
         while index < (numArgs - 1):
@@ -58,11 +52,9 @@ class Parameters:
             if optionName == "--numbest":
                 index += 1
                 self.numBest = int(args[index])
-            if optionName == "--overlap":
+            if optionName == "--out":
                 index += 1
-                overlap_type = args[index]
-                if overlap_type in ["none", "vertex", "edge"]:
-                    self.overlap = overlap_type
+                self.outputFileName = str(args[index])
             if optionName == "--prune":
                 self.prune = True
             if optionName == "--valuebased":
@@ -76,33 +68,4 @@ class Parameters:
             if optionName == "--temporal":
                 self.temporal = True
             index += 1
-    
-    def print(self):
-        print("Parameters:")
-        print("  Input File Name: " + self.inputFileName)
-        print("  Output File Name: " + self.outputFileName)
-        print("  Beam Width: " + str(self.beamWidth))
-        print("  Iterations: " + str(self.iterations))
-        print("  Limit: " + str(self.limit))
-        print("  Max Size: " + str(self.maxSize))
-        print("  Min Size: " + str(self.minSize))
-        print("  Num Best: " + str(self.numBest))
-        print("  Overlap: " + self.overlap)
-        print("  Prune: " + str(self.prune))
-        print("  Value Based: " + str(self.valueBased))
-        print("  Write Compressed: " + str(self.writeCompressed))
-        print("  Write Pattern: " + str(self.writePattern))
-        print("  Write Instances: " + str(self.writeInstances))
-        print("  Temporal: " + str(self.temporal))
-        print("  Experiment Folder: " + str(self.experimentFolder) + "\n")
-
-    def set_defaults_for_graph(self, graph):
-        if (self.limit == 0):
-            self.limit = int(len(graph.edges) / 2)
-        if (self.maxSize == 0):
-            self.maxSize = int(len(graph.edges) / 2)
-        if (self.iterations == 0):
-            self.iterations = len(graph.edges)
-
-    def set_parameters_from_kwargs(self, **kwargs):
-        self.__dict__.update(kwargs)
+        
