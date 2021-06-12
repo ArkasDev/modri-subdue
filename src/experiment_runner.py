@@ -167,6 +167,7 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
 
 def run_subdue_python(experiment_path, graph_file):
     # Convert json graph file to the subdue graph data structure
+    print("Graph file: " + experiment_path + " --- " + graph_file)
     graph = Subdue.read_graph(graph_file)
 
     # Subdue parameters
@@ -174,11 +175,11 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 8
+    parameters.beamWidth = 6
     parameters.iterations = 1
-    parameters.limit = 100
+    parameters.limit = 30
     parameters.maxSize = 7
-    parameters.minSize = 7
+    parameters.minSize = 2
     parameters.numBest = 1
     parameters.overlap = 'vertex'
 
@@ -202,11 +203,11 @@ def run_subdue_c(experiment_path):
     parameters.graphPath = experiment_path + "/connected_components.g"
     parameters.subdue_lib_windows_location = "..\\lib\\subdue_c\\bin\\subdue.exe"
 
-    parameters.beamWidth = 4
+    parameters.beamWidth = 6
     parameters.iterations = 1
-    parameters.limit = 50
-    parameters.maxSize = 50
-    parameters.minSize = 1
+    parameters.limit = 30
+    parameters.maxSize = 7
+    parameters.minSize = 2
     parameters.numBest = 1
     parameters.overlap = True
 
@@ -230,6 +231,9 @@ def run_subdue_python_1_1(experiment_path, graph_file):
     parameters.maxSize = 50
     parameters.minSize = 1
     parameters.numBest = 1
+
+    # Not available in the Subdue version 1.1
+    # parameters.overlap
 
     parameters.prune = False
     parameters.valueBased = False
@@ -320,8 +324,8 @@ if __name__ == "__main__":
         exp_folder_prefix = sys.argv[3]
     else:
         experiment_path = "../data/experiment_subdue_pilot"
-        algorithm = "gaston"
+        algorithm = "subdue_c"
         exp_folder_prefix = experiment_folder_prefix
         run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
                        experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=True, skip_mining=False, skip_evaluation=False)
+                       skip_preparation=False, skip_mining=False, skip_evaluation=False)

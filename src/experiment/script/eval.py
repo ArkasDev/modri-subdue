@@ -4,7 +4,7 @@ import re
 import sys
 import os
 import json
-
+import os.path
 import time
 import functools
 import matplotlib.pyplot as plt
@@ -141,9 +141,10 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
         if algorithm == "subdue_python_1_1":
             graph = []
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
-            graph.append(pattern)
-            plot_graphs(graph, data_set_path + "/subdue_1_1_pattern_graph")
+            if os.path.isfile(data_set_path + "/subdue_python_1_1.output-pattern-1.json"):
+                pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+                graph.append(pattern)
+                plot_graphs(graph, data_set_path + "/subdue_1_1_pattern_graph")
 
         # Load and plot the correct graph
         correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
@@ -190,8 +191,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
         elif algorithm == "subdue_python_1_1":
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
-            evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
+            if os.path.isfile(data_set_path + "/subdue_python_1_1.output-pattern-1.json"):
+                pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+                evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
 
 # Plot graphs
 def plot_graphs(S, file_path, labels=True):

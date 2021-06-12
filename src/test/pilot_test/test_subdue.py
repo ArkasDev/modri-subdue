@@ -77,6 +77,9 @@ def run_subdue_python_1_1(experiment_path, graph_file):
     parameters.minSize = 1
     parameters.numBest = 1
 
+    # Not available in the Subdue version 1.1
+    # parameters.overlap
+
     parameters.prune = False
     parameters.valueBased = False
 
