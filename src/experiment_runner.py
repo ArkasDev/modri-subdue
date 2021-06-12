@@ -7,17 +7,17 @@ import sys
 import math
 import pickle
 import time
-import experiment.script.eval as evaluation
-import experiment.script.compute_components as compute
+import experiment_scripts.evaluation as evaluation
+import experiment_scripts.compute_components as compute
 import subdue_c.subdue_c as subdue_c
 from subdue_python import Subdue, Parameters
+from subdue_python_1_1 import parameters_subdue_python_1_1
 from subdue_c import parameters_subdue_c
 from subdue_python_1_1 import subdue_python_1_1
 from guppy import hpy
 from parsemis.parsemis import ParsemisMiner
-import experiment.script.converter as converter
 
-# My local experiment folder paths
+# My local experiment_scripts folder paths
 experiment_folder_prefix = "SingleEO"
 experiment_0_path = "../data/experiment_0"
 experiment_1_path = "../data/experiment_1"
@@ -32,9 +32,9 @@ relative_threshold = 0.4
 def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix,
                    skip_preparation=True, skip_mining=False, skip_evaluation=False):
     """
-    :param experiment_data_set_path: Path to the experiment data set
+    :param experiment_data_set_path: Path to the experiment_scripts data set
     :param algorithm: Use an algorithm for graph mining the model repositories: gaston, gspan, subdue_c, subdue_python, modri_subdue
-    :param skip_preparation: If true it skips the experiment preparation. Usually only needs to be performed once
+    :param skip_preparation: If true it skips the experiment_scripts preparation. Usually only needs to be performed once
     :param skip_mining: If true it skips the graph mining phase
     :param skip_evaluation: If true it skips the evaluation phase
     """
@@ -56,10 +56,10 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
 
     print("Preparation running...")
 
-    # Loop through all single data sets in the experiment folder
+    # Loop through all single data sets in the experiment_scripts folder
     for single_set_name in os.listdir(experiment_data_set_path):
 
-        # Ignore other files in the experiment root folder, just loop through single data set folders
+        # Ignore other files in the experiment_scripts root folder, just loop through single data set folders
         if not single_set_name.startswith(experiment_folder_prefix):
             continue
 
@@ -98,10 +98,10 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
 
     print("Mining running...")
 
-    # Loop through all single data sets in the experiment folder
+    # Loop through all single data sets in the experiment_scripts folder
     for single_set_name in os.listdir(experiment_data_set_path):
 
-        # Ignore other files in the experiment root folder, just loop through single data set folders
+        # Ignore other files in the experiment_scripts root folder, just loop through single data set folders
         if not single_set_name.startswith(experiment_folder_prefix):
             continue
 
@@ -143,7 +143,7 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
             # Load the aggregated graph of all diffs of this single data set
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
             # Run ModriSubdue
-            run_modri_subdue(experiment_data_set_path + "/" + single_set_name, graph)
+            run_theobald_subdue(experiment_data_set_path + "/" + single_set_name, graph)
 
         # End performance test
         end_time = time.time()
@@ -175,13 +175,13 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 6
+    parameters.beamWidth = 3
     parameters.iterations = 1
-    parameters.limit = 30
-    parameters.maxSize = 7
-    parameters.minSize = 2
+    parameters.limit = 50
+    parameters.maxSize = 50
+    parameters.minSize = 1
     parameters.numBest = 1
-    parameters.overlap = 'vertex'
+    parameters.overlap = 'none'
 
     parameters.prune = False
     parameters.valueBased = False
@@ -203,13 +203,13 @@ def run_subdue_c(experiment_path):
     parameters.graphPath = experiment_path + "/connected_components.g"
     parameters.subdue_lib_windows_location = "..\\lib\\subdue_c\\bin\\subdue.exe"
 
-    parameters.beamWidth = 6
+    parameters.beamWidth = 3
     parameters.iterations = 1
-    parameters.limit = 30
-    parameters.maxSize = 7
-    parameters.minSize = 2
+    parameters.limit = 50
+    parameters.maxSize = 50
+    parameters.minSize = 1
     parameters.numBest = 1
-    parameters.overlap = True
+    parameters.overlap = False
 
     parameters.prune = False
     parameters.valueBased = False
@@ -220,7 +220,7 @@ def run_subdue_c(experiment_path):
 def run_subdue_python_1_1(experiment_path, graph_file):
     subdue_windows_location = "..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
 
-    parameters = Parameters.Parameters()
+    parameters = parameters_subdue_python_1_1.ParametersSubduePython1_1()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python_1_1.output"
     parameters.inputFileName = graph_file
@@ -241,7 +241,7 @@ def run_subdue_python_1_1(experiment_path, graph_file):
     subdue_python_1_1.run(python_v_2_7_path, subdue_windows_location, parameters)
 
 
-def run_modri_subdue(experiment_path, graph):
+def run_theobald_subdue(experiment_path, graph):
     return
 
 
@@ -294,7 +294,7 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
         stats_tpn.write(
             '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
 
-    # Evaluate each experiment
+    # Evaluate each experiment_scripts
     for set_name in os.listdir(experiment_path):
 
         # Skip other files, just loop through dataset folders

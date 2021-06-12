@@ -20,4 +20,3 @@ if __name__ == "__main__":
     export_path = sys.argv[2]
     # export
     load_components_networkx(input_folder, export_path)
-

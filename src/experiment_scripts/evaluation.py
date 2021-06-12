@@ -3,16 +3,15 @@ import pickle
 import re
 import sys
 import os
-import json
 import os.path
 import time
 import functools
 import matplotlib.pyplot as plt
 import networkx as nx
-from experiment.script.algos import most_frequent_induced_subgraphs_compression_based, most_frequent_induced_subgraphs, \
-    find_induced_subgraph_hops, is_subgraph, is_subgraph_mono, is_label_isomorphic
-from experiment.script.compute_components import load_components_networkx
-import experiment.script.converter as converter
+
+import experiment_scripts.compute_components
+from experiment_scripts.algorithms import is_subgraph_mono, is_label_isomorphic
+from experiment_scripts.compute_components import load_components_networkx
 from termcolor import colored
 
 data_set_path = None
@@ -55,7 +54,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
     # For a simulation, we have some parameters that we can read out of the set_names
     if is_simulation:
-        # Parse experiment params
+        # Parse experiment_scripts params
         regex = r".*\D(\d+)_eo(\d+)_p(\d,\d)"
         match = re.match(regex, data_set_path)
         nb_diffs = int(match.group(1))
@@ -115,23 +114,26 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     else:
         print("Skip compression and frequency computation for subdue")
 
-            # print as list
-            # print_results_list(sorted_recommendation_pruned, 15, label="compression")
-            # print_results_list(sorted_recommendation_pruned_f, 15, label="frequency")
+        # print as list
+        # print_results_list(sorted_recommendation_pruned, 15, label="compression")
+        # print_results_list(sorted_recommendation_pruned_f, 15, label="frequency")
 
     ################################## EVALUATION ############################################
     if is_evaluation:
 
         if algorithm == "subdue_python":
             graph = []
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                data_set_path + "/subdue_python.output-pattern-1.json")
             graph.append(pattern)
             plot_graphs(graph, data_set_path + "/subdue_pattern_graph")
 
         if algorithm == "subdue_c":
             graph = []
-            converter.export_node_link_graph_from_subdue_c_graph(data_set_path + "/subdue_c_output.g", data_set_path + "/subdue_c_output.json")
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
+            experiment_scripts.compute_components.export_node_link_graph_from_subdue_c_graph(
+                data_set_path + "/subdue_c_output.g", data_set_path + "/subdue_c_output.json")
+            pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                data_set_path + "/subdue_c_output.json")
 
             if pattern is not None:
                 graph.append(pattern)
@@ -142,7 +144,8 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         if algorithm == "subdue_python_1_1":
             graph = []
             if os.path.isfile(data_set_path + "/subdue_python_1_1.output-pattern-1.json"):
-                pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+                pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                    data_set_path + "/subdue_python_1_1.output-pattern-1.json")
                 graph.append(pattern)
                 plot_graphs(graph, data_set_path + "/subdue_1_1_pattern_graph")
 
@@ -178,22 +181,27 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
                     [nb_diffs, nb_eos, pertubation, str(number_of_nodes_per_component),
                      str(number_of_edges_per_component),
                      str(degree_per_component), str(avg_nb_of_components_per_diff), str(nb_components), str(threshold),
-                     str(size_at_threshold), str(cnt_exact_match_1), str(cnt_exact_match_2), str(elapsed_time), str(heap_size), score_1,
+                     str(size_at_threshold), str(cnt_exact_match_1), str(cnt_exact_match_2), str(elapsed_time),
+                     str(heap_size), score_1,
                      score_2])
 
         if (algorithm == "gaston") or (algorithm == "gspan"):
             evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python":
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python.output-pattern-1.json")
+            pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                data_set_path + "/subdue_python.output-pattern-1.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
         elif algorithm == "subdue_c":
-            pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_c_output.json")
+            pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                data_set_path + "/subdue_c_output.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
         elif algorithm == "subdue_python_1_1":
             if os.path.isfile(data_set_path + "/subdue_python_1_1.output-pattern-1.json"):
-                pattern = converter.convert_node_link_graph_to_nx_graph(data_set_path + "/subdue_python_1_1.output-pattern-1.json")
+                pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                    data_set_path + "/subdue_python_1_1.output-pattern-1.json")
                 evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
+
 
 # Plot graphs
 def plot_graphs(S, file_path, labels=True):
@@ -386,13 +394,15 @@ def print_results(pruned_lattice, original_lattice, top_k, good_children_sorting
             break
         if print_results_bool:
             print("-----------LEADING GRAPH------------------")
-            print_single(original_lattice, key, label + "/" + str(position) + ":0", label + "/" + str(position) + "_0", export_pickle=export_pickle)
+            print_single(original_lattice, key, label + "/" + str(position) + ":0", label + "/" + str(position) + "_0",
+                         export_pickle=export_pickle)
             print("-----------Good children:----------------")
         # get the "good children" and sort them
         value.sort(key=good_children_sorting, reverse=True)
         child_position = 1
         for child in value[:max_good_children]:
-            print_single(original_lattice, child, label + "/" + str(position) + ":" + str(child_position), label + "/" + str(position) + "_" + str(child_position),
+            print_single(original_lattice, child, label + "/" + str(position) + ":" + str(child_position),
+                         label + "/" + str(position) + "_" + str(child_position),
                          export_pickle=export_pickle)
             child_position += 1
         position += 1
@@ -471,4 +481,5 @@ def average(lst):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8],
+         sys.argv[9], sys.argv[10])

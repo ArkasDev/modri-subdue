@@ -231,11 +231,13 @@ def is_subgraph_mono(G1, G2, label_name='label'):
     GM = GraphMatcherMono(G2, G1, node_match=nm, edge_match=em)
     return GM.subgraph_is_monomorphic()
 
+
 def is_subgraph_mono_mapping(G1, G2, label_name='label'):
     nm = iso.categorical_node_match(label_name, "")
     em = iso.categorical_edge_match(label_name, "")
     GM = GraphMatcherMono(G2, G1, node_match=nm, edge_match=em)
     return GM.subgraph_is_monomorphic(), GM.mapping
+
 
 def list_difference(l1: list, l2: list):
     '''Computes the difference of two lists by removing as many equal objects as possible and returning the sum of all remaining'''

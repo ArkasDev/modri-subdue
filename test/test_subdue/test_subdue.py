@@ -1,9 +1,11 @@
 import pickle
-from experiment.script.eval import get_position_sorted_list
-from experiment.script.eval import plot_graphs
-import experiment.script.converter as converter
-import experiment.script.compute_components as compute
+
+import experiment_scripts.compute_components
+from experiment_scripts.evaluation import get_position_sorted_list
+from experiment_scripts.evaluation import plot_graphs
+import experiment_scripts.compute_components as compute
 from termcolor import colored
+import os
 import subdue_c.subdue_c as subdue_c
 from subdue_c import parameters_subdue_c
 from subdue_python import Subdue, Parameters
@@ -11,34 +13,44 @@ import subdue_python_1_1.subdue_python_1_1 as subdue_python_1_1
 
 python_v_2_7_path = "C:\\Python2716\\python.exe"
 
+
+def before():
+    for f in os.listdir('test_1/results'):
+        os.remove(os.path.join('test_1/results', f))
+    for f in os.listdir('test_2/results'):
+        os.remove(os.path.join('test_2/results', f))
+
+
 def run_subdue_test_1():
     print("create pilot_test_1")
-    correct_nx_graph = converter.convert_node_link_graph_to_nx_graph("test_1/graph_1.json")
-    pickle.dump(correct_nx_graph, open("test_1/graph_1.p", "wb"))
-    plot_graphs([correct_nx_graph], "test_1/graph_1")
-    compute.export_subdue_c_graph([correct_nx_graph], 'test_1/graph_1.g')
+    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph("test_1/graph_1.json")
+    pickle.dump(correct_nx_graph, open("test_1/results/graph_1.p", "wb"))
+    plot_graphs([correct_nx_graph], "test_1/results/graph_1")
+    compute.export_subdue_c_graph([correct_nx_graph], 'test_1/results/graph_1.g')
 
-    run_subdue_c("test_1", "test_1/graph_1.g")
-    converter.export_node_link_graph_from_subdue_c_graph("test_1/subdue_c_output.g", "test_1/subdue_c_output.json")
+    run_subdue_c("test_1/results", "test_1/results/graph_1.g")
+    experiment_scripts.compute_components.export_node_link_graph_from_subdue_c_graph("test_1/results/subdue_c_output.g",
+                                                                                     "test_1/results/subdue_c_output.json")
 
-    run_subdue_python("test_1", "test_1/graph_1.json")
+    run_subdue_python("test_1/results", "test_1/graph_1.json")
 
-    run_subdue_python_1_1("test_1", "test_1/graph_1.json")
+    run_subdue_python_1_1("test_1/results", "test_1/graph_1.json")
 
 
 def run_subdue_test_2():
     print("create pilot_test_2")
-    correct_nx_graph = converter.convert_node_link_graph_to_nx_graph("test_2/graph_2.json")
-    pickle.dump(correct_nx_graph, open("test_2/graph_2.p", "wb"))
-    plot_graphs([correct_nx_graph], "test_2/graph_2")
-    compute.export_subdue_c_graph([correct_nx_graph], 'test_2/graph_2.g')
+    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph("test_2/graph_2.json")
+    pickle.dump(correct_nx_graph, open("test_2/results/graph_2.p", "wb"))
+    plot_graphs([correct_nx_graph], "test_2/results/graph_2")
+    compute.export_subdue_c_graph([correct_nx_graph], 'test_2/results/graph_2.g')
 
-    run_subdue_c("test_2", "test_2/graph_2.g")
-    converter.export_node_link_graph_from_subdue_c_graph("test_2/subdue_c_output.g", "test_2/subdue_c_output.json")
+    run_subdue_c("test_2/results", "test_2/results/graph_2.g")
+    experiment_scripts.compute_components.export_node_link_graph_from_subdue_c_graph("test_2/results/subdue_c_output.g",
+                                                                                     "test_2/results/subdue_c_output.json")
 
-    run_subdue_python("test_2", "test_2/graph_2.json")
+    run_subdue_python("test_2/results", "test_2/graph_2.json")
 
-    run_subdue_python_1_1("test_2", "test_2/graph_2.json")
+    run_subdue_python_1_1("test_2/results", "test_2/graph_2.json")
 
 
 def run_subdue_c(experiment_path, graph_path):
@@ -46,7 +58,7 @@ def run_subdue_c(experiment_path, graph_path):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_c_output.g"
     parameters.graphPath = graph_path
-    parameters.subdue_lib_windows_location = "..\\..\\..\\lib\\subdue_c\\bin\\subdue.exe"
+    parameters.subdue_lib_windows_location = "..\\..\\lib\\subdue_c\\bin\\subdue.exe"
 
     parameters.beamWidth = 4
     parameters.iterations = 1
@@ -63,7 +75,7 @@ def run_subdue_c(experiment_path, graph_path):
 
 
 def run_subdue_python_1_1(experiment_path, graph_file):
-    subdue_windows_location = "..\\..\\..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
+    subdue_windows_location = "..\\..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
 
     parameters = Parameters.Parameters()
     parameters.experimentFolder = experiment_path
@@ -121,8 +133,10 @@ def run_subdue_python(experiment_path, graph_file):
 
 def test_1_python():
     print("test_1_python")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/subdue_python_output-pattern-1.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/results/subdue_python_output-pattern-1.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -133,8 +147,10 @@ def test_1_python():
 
 def test_2_python():
     print("test_2_python")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/subdue_python_output-pattern-1.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/results/subdue_python_output-pattern-1.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -145,8 +161,10 @@ def test_2_python():
 
 def test_1_python_1_1():
     print("test_1_python_1_1")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/subdue_python_1_1_output-pattern-1.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/results/subdue_python_1_1_output-pattern-1.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -157,8 +175,10 @@ def test_1_python_1_1():
 
 def test_2_python_1_1():
     print("test_2_python_1_1")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/subdue_python_1_1_output-pattern-1.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/results/subdue_python_1_1_output-pattern-1.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -166,10 +186,13 @@ def test_2_python_1_1():
         print(colored("Passed. Output: " + str(score), "green"))
     print("--------------------------------------------")
 
+
 def test_1_c():
     print("test_1_c")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/subdue_c_output.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_1/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/results/subdue_c_output.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_1/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -180,8 +203,10 @@ def test_1_c():
 
 def test_2_c():
     print("test_2_c")
-    correct_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/subdue_c_output.json")
-    mined_pattern = converter.convert_node_link_graph_to_nx_graph("test_2/correct_graph.json")
+    correct_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/results/subdue_c_output.json")
+    mined_pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        "test_2/correct_graph.json")
     score = get_position_sorted_list(correct_pattern, [mined_pattern])
     if score == -1:
         print(colored("Error. Output: " + str(score), "red"))
@@ -191,6 +216,8 @@ def test_2_c():
 
 
 if __name__ == "__main__":
+    before()
+
     run_subdue_test_1()
     run_subdue_test_2()
 
