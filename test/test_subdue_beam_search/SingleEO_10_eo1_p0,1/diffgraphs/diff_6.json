@@ -1,0 +1,52 @@
+{"directed": false, "multigraph": false, "graph": {}, 
+  "nodes": [{
+	 "id": "0", 
+	 "label": "Add_Port" 
+},{
+	 "id": "1", 
+	 "label": "Add_Port" 
+},{
+	 "id": "2", 
+	 "label": "Add_Connector" 
+},{
+	 "id": "3", 
+	 "label": "Add_Requirement" 
+},{
+	 "id": "4", 
+	 "label": "Preserve_Package" 
+},{
+	 "id": "5", 
+	 "label": "Preserve_Component" 
+},{
+	 "id": "6", 
+	 "label": "Preserve_Component" 
+}], 
+ "links": [{
+	 "source": "2", 
+	 "target": "3", 
+	 "label": "Add_requirement" 
+},{
+	 "source": "2", 
+	 "target": "0", 
+	 "label": "Add_src" 
+},{
+	 "source": "2", 
+	 "target": "1", 
+	 "label": "Add_tgt" 
+},{
+	 "source": "4", 
+	 "target": "2", 
+	 "label": "Add_connector" 
+},{
+	 "source": "4", 
+	 "target": "3", 
+	 "label": "Add_requirement" 
+},{
+	 "source": "5", 
+	 "target": "1", 
+	 "label": "Add_port" 
+},{
+	 "source": "6", 
+	 "target": "0", 
+	 "label": "Add_port" 
+}]}

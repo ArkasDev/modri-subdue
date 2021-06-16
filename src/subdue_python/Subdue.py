@@ -11,6 +11,14 @@ import contextlib
 import subdue_python.Graph as Graph
 import subdue_python.Pattern as Pattern
 import subdue_python.Parameters as Parameters
+import os
+import json
+from random import randrange
+import experiment_scripts.compute_components
+from experiment_scripts.algorithms import is_subgraph_mono, is_label_isomorphic
+from experiment_scripts.compute_components import load_components_networkx
+from termcolor import colored
+from experiment_scripts.evaluation import plot_graphs
 
 DEBUGFLAG = False
 
@@ -23,7 +31,9 @@ def main():
     graph = read_graph(parameters.inputFileName)
 
     parameters.set_defaults_for_graph(graph)
-    parameters.print()
+
+    if not parameters.beamSearchDebugging:
+        parameters.print()
 
     # Execute subdue_python algorithm
     subdue(parameters, graph)
@@ -70,7 +80,9 @@ def subdue(parameters, graph):
         # Show pretty output for this iteration with input graph information
         if iteration > 1:
             print("----- Iteration " + str(iteration) + " -----\n")
-        print("Graph: " + str(len(graph.vertices)) + " vertices, " + str(len(graph.edges)) + " edges")
+
+        if not parameters.beamSearchDebugging:
+            print("Graph: " + str(len(graph.vertices)) + " vertices, " + str(len(graph.edges)) + " edges")
 
         # 1. PHASE: Start with substructure discovery
         # Temporary list of found patterns in this iteration
@@ -81,10 +93,11 @@ def subdue(parameters, graph):
             print("No patterns found.\n")
         else:
             patterns.append(pattern_list)
-            print("\nBest " + str(len(pattern_list)) + " patterns:\n")
-            for pattern in pattern_list:
-                pattern.print_pattern('  ')
-                print("")
+            if not parameters.beamSearchDebugging:
+                print("\nBest " + str(len(pattern_list)) + " patterns:\n")
+                for pattern in pattern_list:
+                    pattern.print_pattern('  ')
+                    print("")
             # write machine-readable output, if requested
             if (parameters.writePattern):
                 outputFileName = parameters.outputFileName + "-pattern-" + str(iteration) + ".json"
@@ -119,48 +132,187 @@ def substructure_discover(parameters, graph):
     :return: Best patterns in the given graph for the current iteration
     """
 
+    # How many times the root loop was run
+    root_count = 0
+
     # How many patterns found in the graph
     pattern_count = 0
 
     # Get initial one-edge patterns
     parent_pattern_list = get_initial_patterns(parameters, graph)
 
-    if DEBUGFLAG:
-        print("Initial patterns (" + str(len(parent_pattern_list)) + "):")
+    if parameters.beamSearchDebugging:
+        print("-----------------------------")
+        print("initial pattern: " + str(len(parent_pattern_list)))
+
+    if parameters.beamSearchDebugging:
+        step = "1. init"
         for pattern in parent_pattern_list:
-            pattern.print_pattern('  ')
+            value = "%.4f" % pattern.value
+            path = parameters.experimentFolder + "/beam_search/" + step + "/"
+            name = "c_" + str(value) + \
+                   "__i_" + str(len(pattern.instances)) + \
+                   "__" + str(randrange(1000))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            pattern.write_pattern_to_file(path + name + ".json")
+            pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(path + name + ".json")
+            plot_graphs([pattern_nx], path + name)
+
+    if parameters.beamSearchDebugging:
+        for parent in parent_pattern_list:
+            print("compression of pattern: " + str(parent.value))
 
     discoveredPatternList = []
+
     while ((pattern_count < parameters.limit) and parent_pattern_list):
-        print(str(int(parameters.limit - pattern_count)) + " ", flush=True)
+
+        # Only for debugging purposes
+        root_count += 1
+
+        if parameters.beamSearchDebugging:
+            if pattern_count > 0:
+                print(colored("Deleting child patterns...", "yellow"))
+
         childPatternList = []
-        # extend each pattern in parent list (***** todo: in parallel)
+
+        # iterate parent patterns
         while (parent_pattern_list):
+
+            if parameters.beamSearchDebugging:
+                print(colored("-----------------------------", "green"))
+                print(colored("Start a parent pattern loop", "green"))
+                print("limit: " + str(pattern_count))
+                print("parent patterns: " + str(len(parent_pattern_list)))
+
             parentPattern = parent_pattern_list.pop(0)
             if ((len(parentPattern.instances) > 1) and (pattern_count < parameters.limit)):
                 pattern_count += 1
+
+                if parameters.beamSearchDebugging:
+                    print("start expansion...")
+
                 extendedPatternList = Pattern.ExtendPattern(parameters, parentPattern)
+
+                if parameters.beamSearchDebugging:
+                    step = "2. expansion"
+                    for pattern in extendedPatternList:
+                        path = parameters.experimentFolder + "/beam_search/" + step + "/" + str(root_count) + "_" + str(pattern_count) + "/"
+                        name = "i_" + str(len(pattern.instances)) + \
+                               "__" + str(randrange(1000))
+                        os.makedirs(os.path.dirname(path), exist_ok=True)
+                        pattern.write_pattern_to_file(path + name + ".json")
+                        pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                            path + name + ".json")
+                        plot_graphs([pattern_nx], path + name)
+
+                if parameters.beamSearchDebugging:
+                    print("expanded patterns: " + str(len(extendedPatternList)))
+
                 while (extendedPatternList):
                     extendedPattern = extendedPatternList.pop(0)
-                    if DEBUGFLAG:
-                        print("Extended Pattern:")
-                        extendedPattern.print_pattern('  ')
+
+                    # only evaluate compression if #edges is lower then the defined max size
                     if (len(extendedPattern.definition.edges) <= parameters.maxSize):
-                        # evaluate each extension and add to child list
+
+                        # evaluate the compression of each extension
                         extendedPattern.evaluate(graph)
+
+                        if parameters.beamSearchDebugging:
+                            print("compression before: " + str(parentPattern.value) + ", after: " + str(extendedPattern.value))
+
+                        # prune = false --> add pattern to child patterns
+                        # prune = true --> add pattern to child patterns only if the extended pattern has higher compression
+                        # child pattern are used for the next expansion
                         if ((not parameters.prune) or (extendedPattern.value >= parentPattern.value)):
                             Pattern.PatternListInsert(extendedPattern, childPatternList, parameters.beamWidth, parameters.valueBased)
+                            if parameters.beamSearchDebugging:
+                                print(colored("Add extended pattern to child patterns", "grey"))
+                        else:
+                            if parameters.beamSearchDebugging:
+                                print(colored("Too bad compression. Do not add extended pattern to child patterns", "grey"))
+            else:
+                if parameters.beamSearchDebugging:
+                    print("Limit reached, no expansion anymore")
+
             # add parent pattern to final discovered list
             if (len(parentPattern.definition.edges) >= parameters.minSize):
-                Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False) # valueBased = False
+                Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False)
+                if parameters.beamSearchDebugging:
+                    print("Add the parent pattern to the final patterns")
+            else:
+                if parameters.beamSearchDebugging:
+                    print(colored("Pattern to small. Its not a good pattern", "red"))
+
+            if parameters.beamSearchDebugging:
+                step = "3. current"
+                for pattern in discoveredPatternList:
+                    value = "%.4f" % pattern.value
+                    path = parameters.experimentFolder + "/beam_search/" + step + "/discovered/" + str(root_count) + "_" + str(pattern_count) + "/"
+                    name = "c_" + str(value) + \
+                           "__i_" + str(len(pattern.instances)) + \
+                           "__" + str(randrange(1000))
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    pattern.write_pattern_to_file(path + name + ".json")
+                    pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(path + name + ".json")
+                    plot_graphs([pattern_nx], path + name)
+                for pattern in childPatternList:
+                    value = "%.4f" % pattern.value
+                    path = parameters.experimentFolder + "/beam_search/" + step + "/child/" + str(root_count) + "_" + str(pattern_count) + "/"
+                    name = "c_" + str(value) + \
+                           "__i_" + str(len(pattern.instances)) + \
+                           "__" + str(randrange(1000))
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    pattern.write_pattern_to_file(path + name + ".json")
+                    pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(path + name + ".json")
+                    plot_graphs([pattern_nx], path + name)
+                for pattern in parent_pattern_list:
+                    value = "%.4f" % pattern.value
+                    path = parameters.experimentFolder + "/beam_search/" + step + "/parent/" + str(root_count) + "_" + str(pattern_count) + "/"
+                    name = "c_" + str(value) + \
+                           "__i_" + str(len(pattern.instances)) + \
+                           "__" + str(randrange(1000))
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    pattern.write_pattern_to_file(path + name + ".json")
+                    pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(path + name + ".json")
+                    plot_graphs([pattern_nx], path + name)
+
+            if parameters.beamSearchDebugging:
+                print(colored("discovered patterns: " + str(len(discoveredPatternList)), "blue"))
+                print(colored("parent patterns: " + str(len(parent_pattern_list)), "blue"))
+                print(colored("child patterns: " + str(len(childPatternList)), "blue"))
+
+        if parameters.beamSearchDebugging:
+            print(colored("Parent pattern loop finished", "magenta"))
+
         parent_pattern_list = childPatternList
-        if not parent_pattern_list:
-            print("No more patterns to consider", flush=True)
+
+    if parameters.beamSearchDebugging:
+        print(colored("Insert any remaining patterns in parent list on to discovered list", "magenta"))
+        print(colored("parent_pattern_list: " + str(len(parent_pattern_list)),  "magenta"))
+
     # insert any remaining patterns in parent list on to discovered list
     while (parent_pattern_list):
         parentPattern = parent_pattern_list.pop(0)
         if (len(parentPattern.definition.edges) >= parameters.minSize):
-            Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False) # valueBased = False
+            Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False)
+
+    if parameters.beamSearchDebugging:
+        print(colored("discoveredPatternList: " + str(len(discoveredPatternList)), "blue"))
+
+    if parameters.beamSearchDebugging:
+        step = "4. result"
+        for pattern in discoveredPatternList:
+            value = "%.4f" % pattern.value
+            path = parameters.experimentFolder + "/beam_search/" + step + "/"
+            name = "c_" + str(value) + \
+                   "__i_" + str(len(pattern.instances)) + \
+                   "__" + str(randrange(1000))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            pattern.write_pattern_to_file(path + name + ".json")
+            pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+                path + name + ".json")
+            plot_graphs([pattern_nx], path + name)
+
     return discoveredPatternList
 
 
@@ -247,7 +399,8 @@ def nx_subdue(
     subdue_graph = Graph.Graph()
     subdue_graph.load_from_networkx(graph, node_attributes, edge_attributes)
     parameters.set_defaults_for_graph(subdue_graph)
-    parameters.print()
+    if not parameters.beamSearchDebugging:
+        parameters.print()
     if verbose:
         iterations = subdue(parameters, subdue_graph)
     else:

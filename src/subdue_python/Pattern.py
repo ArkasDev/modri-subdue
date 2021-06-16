@@ -3,9 +3,18 @@
 # Written by Larry Holder (holder@wsu.edu).
 #
 # Copyright (c) 2017-2021. Washington State University.
+from termcolor import colored
 
 from subdue_python.OrderedSet import OrderedSet # specialized Subdue version
 import subdue_python.Graph as Graph
+import experiment_scripts.evaluation as evaluation
+import experiment_scripts.compute_components as compute
+import uuid
+import sys
+import os
+import json
+from random import randrange
+
 
 class Pattern:
     
@@ -27,7 +36,16 @@ class Pattern:
         for instance in self.instances:
             instance.print_instance(instanceNum, tab+'  ')
             instanceNum += 1
-    
+
+    def write_pattern_to_file(self, outputFileName):
+        outputFile = open(outputFileName, 'w')
+        outputFile.write('[\n')
+        for instance in self.instances:
+            instance.write_to_file(outputFile)
+            break
+        outputFile.write('\n]\n')
+        outputFile.close()
+
     def write_instances_to_file(self, outputFileName, outputDir=""):
         """Write instances of pattern to given file name in JSON format."""
         outputFile = open(outputFileName, 'w')
@@ -194,7 +212,7 @@ def InstanceOverlap(overlap, instance1, instance2):
 
 # ----- Pattern List Operations
 
-def PatternListInsert(newPattern, patternList, maxLength, valueBased):
+def PatternListInsert(newPattern, patternList, maxLength, valueBased, beamSearchDebugging=False, experimentFolder=None, limitCount=None):
     """Insert newPattern into patternList. If newPattern is isomorphic to an existing pattern on patternList, then keep higher-valued
        pattern. The list is kept in decreasing order by pattern value. If valueBased=True, then maxLength represents the maximum number
        of different-valued patterns on the list; otherwise, maxLength represents the maximum number of patterns on the list.
@@ -208,6 +226,9 @@ def PatternListInsert(newPattern, patternList, maxLength, valueBased):
                 # newpattern isomorphic to existing pattern, but better valued
                 patternList.remove(pattern)
                 break
+
+    # pattern list before
+
     # newPattern unique, so insert in order by value
     insertAtIndex = 0
     for pattern in patternList:
@@ -215,6 +236,9 @@ def PatternListInsert(newPattern, patternList, maxLength, valueBased):
             break
         insertAtIndex += 1
     patternList.insert(insertAtIndex, newPattern)
+
+    # pattern list with new pattern
+
     # check if patternList needs to be trimmed
     if valueBased:
         uniqueValues = UniqueValues(patternList)
@@ -225,6 +249,9 @@ def PatternListInsert(newPattern, patternList, maxLength, valueBased):
     else:
         if len(patternList) > maxLength:
             patternList.pop(-1)
+
+    # pattern list with new pattern trimmed based on beam width
+
 
 def UniqueValues(patternList):
     """Returns list of unique values of patterns in given pattern list, in same order."""

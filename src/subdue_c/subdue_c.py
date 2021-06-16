@@ -17,6 +17,9 @@ def run(parameters):
     overlap = '-overlap ' if parameters.overlap is True else ''
     subdue_lib_windows_location = parameters.subdue_lib_windows_location
 
+    if not os.path.isfile(subdue_lib_windows_location):
+        raise Exception("Subdue C lib could not found.")
+
     if os.name == "posix":
         raise Exception("Subdue C wrapper not defined under linux.")
 

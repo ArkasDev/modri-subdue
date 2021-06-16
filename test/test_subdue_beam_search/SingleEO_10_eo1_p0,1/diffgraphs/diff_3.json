@@ -1,0 +1,81 @@
+{"directed": false, "multigraph": false, "graph": {}, 
+  "nodes": [{
+	 "id": "0", 
+	 "label": "Add_Connector" 
+},{
+	 "id": "1", 
+	 "label": "Add_Requirement" 
+},{
+	 "id": "2", 
+	 "label": "Add_Port" 
+},{
+	 "id": "3", 
+	 "label": "Add_Port" 
+},{
+	 "id": "4", 
+	 "label": "Add_SwImplementation" 
+},{
+	 "id": "5", 
+	 "label": "Preserve_Component" 
+},{
+	 "id": "6", 
+	 "label": "Preserve_Component" 
+},{
+	 "id": "7", 
+	 "label": "Preserve_Package" 
+},{
+	 "id": "8", 
+	 "label": "Preserve_Package" 
+},{
+	 "id": "9", 
+	 "label": "Preserve_SwImplementation" 
+}], 
+ "links": [{
+	 "source": "0", 
+	 "target": "1", 
+	 "label": "Add_requirement" 
+},{
+	 "source": "0", 
+	 "target": "2", 
+	 "label": "Add_src" 
+},{
+	 "source": "0", 
+	 "target": "3", 
+	 "label": "Add_tgt" 
+},{
+	 "source": "4", 
+	 "target": "5", 
+	 "label": "Add_component" 
+},{
+	 "source": "6", 
+	 "target": "3", 
+	 "label": "Add_port" 
+},{
+	 "source": "7", 
+	 "target": "0", 
+	 "label": "Add_connector" 
+},{
+	 "source": "7", 
+	 "target": "1", 
+	 "label": "Add_requirement" 
+},{
+	 "source": "8", 
+	 "target": "4", 
+	 "label": "Add_swimplementation" 
+},{
+	 "source": "5", 
+	 "target": "2", 
+	 "label": "Add_port" 
+},{
+	 "source": "5", 
+	 "target": "9", 
+	 "label": "Remove_swimplementation" 
+},{
+	 "source": "5", 
+	 "target": "4", 
+	 "label": "Add_swimplementation" 
+},{
+	 "source": "9", 
+	 "target": "5", 
+	 "label": "Remove_component" 
+}]}

@@ -9,6 +9,9 @@ def run(python_location, subdue_location, parameters):
     prune = '--prune ' if parameters.prune is True else ''
     value_based = '--valuebased ' if parameters.valueBased is True else ''
 
+    if not os.path.isfile(python_location):
+        raise Exception("Python 2.7 could not found.")
+
     if os.name == "posix":
         raise Exception("Subdue python v1.1 wrapper not defined under linux.")
 
