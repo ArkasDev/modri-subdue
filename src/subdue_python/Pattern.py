@@ -14,6 +14,7 @@ import sys
 import os
 import json
 from random import randrange
+import copy
 
 
 class Pattern:
@@ -22,12 +23,12 @@ class Pattern:
         self.definition = None # Graph
         self.instances = []
         self.value = 0.0
-    
-    def evaluate (self, graph):
+
+    def evaluate (self, graph_eval_input):
         """Compute value of using given pattern to compress given graph, where 0 means no compression, and 1 means perfect compression."""
         # (instances-1) because we would also need to retain the definition of the pattern for compression
-        self.value = float(((len(self.instances) - 1) * len(self.definition.edges)) / float(len(graph.edges))) 
-    
+        self.value = float(((len(self.instances) - 1) * len(self.definition.edges)) / float(len(graph_eval_input.edges)))
+
     def print_pattern(self, tab):
         print(tab + "Pattern (value=" + str(self.value) + ", instances=" + str(len(self.instances)) + "):")
         self.definition.print_graph(tab+'  ')
@@ -127,11 +128,15 @@ def ExtendPattern (parameters, pattern):
     """Return list of patterns created by extending each instance of the given pattern by one edge in all possible ways,
        and then collecting matching extended instances together into new patterns."""
     extendedInstances = []
+
+    # Expansion
     for instance in pattern.instances:
         newInstances = ExtendInstance(instance)
         for newInstance in newInstances:
             InsertNewInstance(extendedInstances, newInstance)
     newPatterns = []
+
+    # Check
     while extendedInstances:
         newInstance = extendedInstances.pop(0)
         newInstanceGraph = Graph.CreateGraphFromInstance(newInstance)

@@ -11,6 +11,8 @@ class ParametersSubdueC:
         self.overlap = False          # Extent that pattern instances can overlap
         self.prune = False            # Remove any patterns that are worse than their parent.
         self.valueBased = False       # Retain all patterns with the top beam best values.
+        self.eval = 1                 # 1 (MDL), 2 (Size)
+        self.undirected = False       # Note that graph file edges defined with `u' are always undirected, and edges defined with `d' are always directed.
         self.experimentFolder = ""
         self.graphPath = ""
         self.subdue_lib_windows_location = ""

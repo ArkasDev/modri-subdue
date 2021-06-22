@@ -185,11 +185,15 @@ def substructure_discover(parameters, graph):
                 print("parent patterns: " + str(len(parent_pattern_list)))
 
             parentPattern = parent_pattern_list.pop(0)
-            if ((len(parentPattern.instances) > 1) and (pattern_count < parameters.limit)):
+
+            # TODO: > 1 sinn? warum auf parent und nicht extended
+            if ((len(parentPattern.instances) > 1) and (pattern_count < parameters.limit) and len(parentPattern.definition.edges) + 1 <= parameters.maxSize):
                 pattern_count += 1
 
                 if parameters.beamSearchDebugging:
                     print("start expansion...")
+
+
 
                 extendedPatternList = Pattern.ExtendPattern(parameters, parentPattern)
 
@@ -212,24 +216,25 @@ def substructure_discover(parameters, graph):
                     extendedPattern = extendedPatternList.pop(0)
 
                     # only evaluate compression if #edges is lower then the defined max size
-                    if (len(extendedPattern.definition.edges) <= parameters.maxSize):
+                    # TODO: vor expansion ziehen
+                #if (len(extendedPattern.definition.edges) <= parameters.maxSize):
 
-                        # evaluate the compression of each extension
-                        extendedPattern.evaluate(graph)
+                    # evaluate the compression of each extension
+                    extendedPattern.evaluate(graph)
 
+                    if parameters.beamSearchDebugging:
+                        print("compression before: " + str(parentPattern.value) + ", after: " + str(extendedPattern.value))
+
+                    # prune = false --> add pattern to child patterns
+                    # prune = true --> add pattern to child patterns only if the extended pattern has higher compression
+                    # child pattern are used for the next expansion
+                    if ((not parameters.prune) or (extendedPattern.value >= parentPattern.value)):
+                        Pattern.PatternListInsert(extendedPattern, childPatternList, parameters.beamWidth, parameters.valueBased)
                         if parameters.beamSearchDebugging:
-                            print("compression before: " + str(parentPattern.value) + ", after: " + str(extendedPattern.value))
-
-                        # prune = false --> add pattern to child patterns
-                        # prune = true --> add pattern to child patterns only if the extended pattern has higher compression
-                        # child pattern are used for the next expansion
-                        if ((not parameters.prune) or (extendedPattern.value >= parentPattern.value)):
-                            Pattern.PatternListInsert(extendedPattern, childPatternList, parameters.beamWidth, parameters.valueBased)
-                            if parameters.beamSearchDebugging:
-                                print(colored("Add extended pattern to child patterns", "grey"))
-                        else:
-                            if parameters.beamSearchDebugging:
-                                print(colored("Too bad compression. Do not add extended pattern to child patterns", "grey"))
+                             print(colored("Add extended pattern to child patterns", "grey"))
+                    else:
+                        if parameters.beamSearchDebugging:
+                            print(colored("Too bad compression. Do not add extended pattern to child patterns", "grey"))
             else:
                 if parameters.beamSearchDebugging:
                     print("Limit reached, no expansion anymore")
@@ -284,6 +289,8 @@ def substructure_discover(parameters, graph):
         if parameters.beamSearchDebugging:
             print(colored("Parent pattern loop finished", "magenta"))
 
+        if parameters.beamSearchDebugging:
+            print(colored("Set parent patterns with child patterns...", "yellow"))
         parent_pattern_list = childPatternList
 
     if parameters.beamSearchDebugging:
@@ -293,8 +300,8 @@ def substructure_discover(parameters, graph):
     # insert any remaining patterns in parent list on to discovered list
     while (parent_pattern_list):
         parentPattern = parent_pattern_list.pop(0)
-        if (len(parentPattern.definition.edges) >= parameters.minSize):
-            Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False)
+
+        Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False)
 
     if parameters.beamSearchDebugging:
         print(colored("discoveredPatternList: " + str(len(discoveredPatternList)), "blue"))
@@ -320,6 +327,10 @@ def get_initial_patterns(parameters, graph):
     """
     Returns list of single-edge, evaluated patterns in given graph with more than one instance.
     """
+
+    # Save input graph
+    input_graph = graph
+
     # Save all found single-edge patterns in the current graph
     initial_patterns = []
 
@@ -352,7 +363,7 @@ def get_initial_patterns(parameters, graph):
             else:
                 nonmatchingEdgePairs.append(edgePair2)
         if len(pattern.instances) > 1:
-            pattern.evaluate(graph)
+            pattern.evaluate(input_graph)
             initial_patterns.append(pattern)
         edge_graph_instance_pairs = nonmatchingEdgePairs
     return initial_patterns

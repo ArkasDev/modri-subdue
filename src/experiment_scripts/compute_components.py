@@ -78,8 +78,8 @@ def export_subdue_c_graph(graph_db, path):
 def export_subdue_python_json(graph_db, path):
     with open(path, 'w') as output_graph_file:
         output_graph_file.write('[\n')
-        last_node_id_from_last_graph = 0
-        last_edge_id_from_last_graph = 0
+        last_node_id_from_last_graph = 1
+        last_edge_id_from_last_graph = 1
 
         for i, graph in enumerate(graph_db):
             temp_graph = nx.convert_node_labels_to_integers(graph, first_label=0)

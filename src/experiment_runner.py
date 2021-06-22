@@ -175,13 +175,13 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 4
     parameters.iterations = 1
-    parameters.limit = 50
-    parameters.maxSize = 50
-    parameters.minSize = 1
+    parameters.limit = 30
+    parameters.maxSize = 7
+    parameters.minSize = 2
     parameters.numBest = 1
-    parameters.overlap = 'none'
+    parameters.overlap = 'vertex'
 
     parameters.prune = False
     parameters.valueBased = False
@@ -203,14 +203,16 @@ def run_subdue_c(experiment_path):
     parameters.graphPath = experiment_path + "/connected_components.g"
     parameters.subdue_lib_windows_location = "..\\lib\\subdue_c\\bin\\subdue.exe"
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 4
     parameters.iterations = 1
-    parameters.limit = 50
-    parameters.maxSize = 50
+    parameters.limit = 0
+    parameters.maxSize = 0
     parameters.minSize = 1
     parameters.numBest = 1
-    parameters.overlap = False
+    parameters.overlap = True
 
+    parameters.eval = 1
+    parameters.undirected = True
     parameters.prune = False
     parameters.valueBased = False
 
@@ -225,7 +227,7 @@ def run_subdue_python_1_1(experiment_path, graph_file):
     parameters.outputFileName = experiment_path + "/subdue_python_1_1.output"
     parameters.inputFileName = graph_file
 
-    parameters.beamWidth = 4
+    parameters.beamWidth = 3
     parameters.iterations = 1
     parameters.limit = 50
     parameters.maxSize = 50
@@ -324,8 +326,8 @@ if __name__ == "__main__":
         exp_folder_prefix = sys.argv[3]
     else:
         experiment_path = "../data/experiment_subdue_pilot"
-        algorithm = "subdue_c"
+        algorithm = "subdue_python"
         exp_folder_prefix = experiment_folder_prefix
         run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
                        experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=False, skip_mining=False, skip_evaluation=False)
+                       skip_preparation=True, skip_mining=False, skip_evaluation=False)
