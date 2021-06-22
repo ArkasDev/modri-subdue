@@ -6,10 +6,9 @@ from experiment_scripts.evaluation import plot_graphs
 import experiment_scripts.compute_components as compute
 from termcolor import colored
 import os
-import subdue_c.subdue_c as subdue_c
-from subdue_c import parameters_subdue_c
+from lib.subdue_c import parameters_subdue_c, subdue_c as subdue_c
 from subdue_python import Subdue, Parameters
-import subdue_python_1_1.subdue_python_1_1 as subdue_python_1_1
+import lib.subdue_python_1_1_pv_2_7.subdue_python_1_1 as subdue_python_1_1
 
 python_v_2_7_path = "C:\\Python2716\\python.exe"
 
@@ -75,7 +74,7 @@ def run_subdue_c(experiment_path, graph_path):
 
 
 def run_subdue_python_1_1(experiment_path, graph_file):
-    subdue_windows_location = "..\\..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
+    subdue_windows_location = "..\\..\\lib\\subdue_python_1_1_pv_2_7\\src\\Subdue.py"
 
     parameters = Parameters.Parameters()
     parameters.experimentFolder = experiment_path

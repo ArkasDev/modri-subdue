@@ -9,13 +9,26 @@ import pickle
 import time
 import experiment_scripts.evaluation as evaluation
 import experiment_scripts.compute_components as compute
-import subdue_c.subdue_c as subdue_c
-from subdue_python import Subdue, Parameters
-from subdue_python_1_1 import parameters_subdue_python_1_1
-from subdue_c import parameters_subdue_c
-from subdue_python_1_1 import subdue_python_1_1
 from guppy import hpy
-from parsemis.parsemis import ParsemisMiner
+
+# python subdue v1.4
+from lib.subdue_python_1_4 import Subdue as subdue_1_4
+from lib.subdue_python_1_4 import Parameters as parameters_subdue_1_4
+
+# python subdue v1.4 under test implementation
+from subdue_python import Subdue as subdue_1_4_under_test
+from subdue_python import Parameters as parameters_subdue_1_4_under_test
+
+# python subdue v1.1
+from lib.subdue_python_1_1_pv_2_7 import subdue_python_1_1
+from lib.subdue_python_1_1_pv_2_7 import parameters_subdue_python_1_1
+
+# subdue c
+from lib.subdue_c import subdue_c as subdue_c
+from lib.subdue_c import parameters_subdue_c as parameters_subdue_c
+
+# gspan and gaston
+from lib.parsemis.parsemis import ParsemisMiner
 
 # My local experiment_scripts folder paths
 experiment_folder_prefix = "SingleEO"
@@ -129,7 +142,12 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
             # Load the aggregated graph of all diffs of this single data set
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
             # Run Python Subdue
-            run_subdue_python(experiment_data_set_path + "/" + single_set_name, graph)
+            run_subdue_python(experiment_data_set_path + "/" + single_set_name, graph, False)
+        if algorithm == "subdue_python_under_test":
+            # Load the aggregated graph of all diffs of this single data set
+            graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
+            # Run Python Subdue
+            run_subdue_python(experiment_data_set_path + "/" + single_set_name, graph, True)
         if algorithm == "subdue_python_1_1":
             # Load the aggregated graph of all diffs of this single data set
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
@@ -165,13 +183,13 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
     print("Mining done")
 
 
-def run_subdue_python(experiment_path, graph_file):
+def run_subdue_python(experiment_path, graph_file, under_test_implementation=False):
     # Convert json graph file to the subdue graph data structure
     print("Graph file: " + experiment_path + " --- " + graph_file)
-    graph = Subdue.read_graph(graph_file)
+    graph = subdue_1_4_under_test.read_graph(graph_file)
 
     # Subdue parameters
-    parameters = Parameters.Parameters()
+    parameters = parameters_subdue_1_4_under_test.Parameters()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
@@ -193,10 +211,16 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.print()
     parameters.set_defaults_for_graph(graph)
 
-    Subdue.subdue(parameters, graph)
+    if under_test_implementation is True:
+        print("Start mining with Python Subdue v1.4 under test...\n")
+        subdue_1_4_under_test.subdue(parameters, graph)
+    else:
+        print("Start mining with official Python Subdue v1.4...\n")
+        subdue_1_4.Subdue(parameters, graph)
 
 
 def run_subdue_c(experiment_path):
+    print("Start mining with C Subdue v1.1...\n")
     parameters = parameters_subdue_c.ParametersSubdueC()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_c_output.g"
@@ -220,6 +244,8 @@ def run_subdue_c(experiment_path):
 
 
 def run_subdue_python_1_1(experiment_path, graph_file):
+    print("Start mining with Python Subdue v1.1...\n")
+
     subdue_windows_location = "..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
 
     parameters = parameters_subdue_python_1_1.ParametersSubduePython1_1()
@@ -248,6 +274,7 @@ def run_theobald_subdue(experiment_path, graph):
 
 
 def run_gaston(experiment_path, graph, threshold):
+    print("Start mining with Gaston...\n")
     ParsemisMiner(experiment_path, debug=False, mine_undirected=False).mine_graphs(
         graph,
         minimum_frequency=threshold,
@@ -261,6 +288,7 @@ def run_gaston(experiment_path, graph, threshold):
 
 
 def run_gspan(experiment_path, graph, threshold):
+    print("Start mining with gSpan...\n")
     ParsemisMiner(experiment_path, debug=False, mine_undirected=False).mine_graphs(
         graph,
         minimum_frequency=threshold,

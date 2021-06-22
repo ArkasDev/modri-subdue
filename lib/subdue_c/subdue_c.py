@@ -3,10 +3,8 @@ This is a wrapper script for the Subdue C implementation
 https://github.com/gromgull/subdue
 """
 
-import subprocess
 import os
-import subdue_python.Parameters as Parameters
-from termcolor import colored
+
 
 def run(parameters):
     print("Graph path: " + parameters.graphPath)

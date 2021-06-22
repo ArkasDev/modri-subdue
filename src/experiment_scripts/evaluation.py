@@ -121,7 +121,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     ################################## EVALUATION ############################################
     if is_evaluation:
 
-        if algorithm == "subdue_python":
+        if algorithm == "subdue_python" or algorithm == "subdue_python_under_test":
             graph = []
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
                 data_set_path + "/subdue_python.output-pattern-1.json")
@@ -188,7 +188,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         if (algorithm == "gaston") or (algorithm == "gspan"):
             evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
-        elif algorithm == "subdue_python":
+        elif algorithm == "subdue_python" or algorithm == "subdue_python_under_test":
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
                 data_set_path + "/subdue_python.output-pattern-1.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")

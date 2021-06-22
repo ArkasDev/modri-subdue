@@ -5,7 +5,19 @@ from subdue_python import Subdue, Parameters
 # data_set = "SingleEO_10_eo1_p0,1"
 data_set = "SingleEO_10_eo17_p0,5"
 
+
 def before():
+    if not os.path.exists(data_set + '/beam_search'):
+        os.mkdir(data_set + '/beam_search')
+    if not os.path.exists(data_set + '/beam_search/1. init'):
+        os.mkdir(data_set + '/beam_search/1. init')
+    if not os.path.exists(data_set + '/beam_search/2. expansion'):
+        os.mkdir(data_set + '/beam_search/2. expansion')
+    if not os.path.exists(data_set + '/beam_search/3. current'):
+        os.mkdir(data_set + '/beam_search/3. current')
+    if not os.path.exists(data_set + '/beam_search/4. result'):
+        os.mkdir(data_set + '/beam_search/4. result')
+
     for f in os.listdir(data_set + '/beam_search/1. init'):
         os.remove(os.path.join(data_set + '/beam_search/1. init', f))
 
