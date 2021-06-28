@@ -25,6 +25,7 @@ class Parameters:
         self.writePattern = False     # Write best pattern at iteration i to file outputFileName-pattern-i.json
         self.writeInstances = False   # Write instances of best pattern at iteration i as one graph to file outputFileName-instances-i.json
         self.temporal = False         # Discover static (False) or temporal (True) patterns
+        self.eval = 1                 # 1 (Heuristic), 2 (Size)
         self.experimentFolder = ""
         self.beamSearchDebugging = False
     
@@ -59,6 +60,9 @@ class Parameters:
             if optionName == "--numbest":
                 index += 1
                 self.numBest = int(args[index])
+            if optionName == "--eval":
+                index += 1
+                self.eval = int(args[index])
             if optionName == "--overlap":
                 index += 1
                 overlap_type = args[index]
@@ -96,7 +100,8 @@ class Parameters:
         print("  Write Instances: " + str(self.writeInstances))
         print("  Temporal: " + str(self.temporal))
         print("  Experiment Folder: " + str(self.experimentFolder))
-        print("  BeamSearch Debugging: " + str(self.beamSearchDebugging) + "\n")
+        print("  BeamSearch Debugging: " + str(self.beamSearchDebugging))
+        print("  Eval: " + str(self.eval) + "    1=Heuristic, 2=Size\n")
 
     def set_defaults_for_graph(self, graph):
         if (self.limit == 0):

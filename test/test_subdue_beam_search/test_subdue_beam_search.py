@@ -1,9 +1,17 @@
 import os
+
+import experiment_scripts
 import experiment_scripts.compute_components as compute
+from experiment_scripts.evaluation import plot_graphs
 from subdue_python import Subdue, Parameters
 
+# positive example
+# beamWidth=3 iterations=1 limit=30 maxSize=7 minSize=4 numBest=1 overlap='vertex' eval=1
 # data_set = "SingleEO_10_eo1_p0,1"
-data_set = "SingleEO_10_eo17_p0,5"
+
+# negative example
+# beamWidth=3 iterations=1 limit=30 maxSize=7 minSize=4 numBest=1 overlap='vertex' eval=1
+data_set = "SingleEO_10_eo97_p0,5"
 
 
 def before():
@@ -44,13 +52,15 @@ def run_subdue_python(experiment_path, graph_file):
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 10
     parameters.iterations = 1
-    parameters.limit = 30
-    parameters.maxSize = 7
+    parameters.limit = 0
+    parameters.maxSize = 0
     parameters.minSize = 4
-    parameters.numBest = 1
-    parameters.overlap = 'true'
+    parameters.numBest = 3
+    parameters.overlap = 'vertex'
+
+    parameters.eval = 1
 
     parameters.prune = False
     parameters.valueBased = False
@@ -73,3 +83,14 @@ if __name__ == "__main__":
     compute.main(data_set)
     graph = data_set + "/connected_components.json"
     run_subdue_python(data_set, graph)
+
+    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(data_set + "/subdue_python.output-pattern-1.json")
+    plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-1")
+
+    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        data_set + "/subdue_python.output-pattern-2.json")
+    plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-2")
+
+    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+        data_set + "/subdue_python.output-pattern-0.json")
+    plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-0")

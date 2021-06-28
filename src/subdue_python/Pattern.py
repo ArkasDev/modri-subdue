@@ -24,10 +24,50 @@ class Pattern:
         self.instances = []
         self.value = 0.0
 
-    def evaluate (self, graph_eval_input):
+    def evaluate(self, graph_input, eval, overlap):
+        if eval == 1:
+            self.evaluate_compression_via_heuristic(graph_input)
+        if eval == 2:
+            self.evaluate_compression_via_size(graph_input, overlap)
+
+    def evaluate_compression_via_heuristic(self, graph_input):
         """Compute value of using given pattern to compress given graph, where 0 means no compression, and 1 means perfect compression."""
         # (instances-1) because we would also need to retain the definition of the pattern for compression
-        self.value = float(((len(self.instances) - 1) * len(self.definition.edges)) / float(len(graph_eval_input.edges)))
+        self.value = float(((len(self.instances) - 1) * len(self.definition.edges)) / float(len(graph_input.edges)))
+
+    def evaluate_compression_via_size(self, graph_input, overlap):
+        size_of_compressed_graph = self.calc_size_of_compressed_graph(graph_input, overlap)
+        self.value = float(self.calc_size(graph_input)) / float(self.calc_size(self.definition) + size_of_compressed_graph)
+
+    # TODO: add overlapping
+    def calc_size_of_compressed_graph(self, graph, overlap):
+        size = self.calc_size(graph)
+        for instance in self.instances:
+            size = size + 1
+            size = size - (len(instance.vertices.list_container) + len(instance.edges.list_container))
+        return size
+
+    def calc_overlap_edges(self):
+        num_overlap_edges = 0
+
+        instances_list = self.instances
+
+        while instances_list:
+            current_instance = instances_list.pop()
+            # check other instances
+            for instance in instances_list:
+                # loop for every current instance edge...
+                for current_instance_edge in current_instance.edges.list_container:
+                    # over all edges in the other instance
+                    for instance_edge in instance.edges.list_container:
+                        if current_instance_edge.id == instance_edge.id:
+                            num_overlap_edges = num_overlap_edges + 1
+
+        return num_overlap_edges
+
+    def calc_size(self, graph):
+        size = len(graph.vertices) + len(graph.edges)
+        return size
 
     def print_pattern(self, tab):
         print(tab + "Pattern (value=" + str(self.value) + ", instances=" + str(len(self.instances)) + "):")

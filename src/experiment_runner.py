@@ -193,13 +193,16 @@ def run_subdue_python(experiment_path, graph_file, under_test_implementation=Fal
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 4
+    parameters.beamWidth = 3
     parameters.iterations = 1
-    parameters.limit = 30
+    parameters.limit = 50
     parameters.maxSize = 7
-    parameters.minSize = 2
+    parameters.minSize = 4
     parameters.numBest = 1
     parameters.overlap = 'vertex'
+
+    # only for under test
+    parameters.eval = 1
 
     parameters.prune = False
     parameters.valueBased = False
@@ -231,7 +234,7 @@ def run_subdue_c(experiment_path):
     parameters.iterations = 1
     parameters.limit = 0
     parameters.maxSize = 0
-    parameters.minSize = 1
+    parameters.minSize = 2
     parameters.numBest = 1
     parameters.overlap = True
 
@@ -246,18 +249,18 @@ def run_subdue_c(experiment_path):
 def run_subdue_python_1_1(experiment_path, graph_file):
     print("Start mining with Python Subdue v1.1...\n")
 
-    subdue_windows_location = "..\\lib\\subdue_python_1_1_pv_2_7\\Subdue.py"
+    subdue_windows_location = "..\\lib\\subdue_python_1_1_pv_2_7\\src\\Subdue.py"
 
     parameters = parameters_subdue_python_1_1.ParametersSubduePython1_1()
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python_1_1.output"
     parameters.inputFileName = graph_file
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 4
     parameters.iterations = 1
-    parameters.limit = 50
-    parameters.maxSize = 50
-    parameters.minSize = 1
+    parameters.limit = 0
+    parameters.maxSize = 0
+    parameters.minSize = 2
     parameters.numBest = 1
 
     # Not available in the Subdue version 1.1
@@ -354,8 +357,8 @@ if __name__ == "__main__":
         exp_folder_prefix = sys.argv[3]
     else:
         experiment_path = "../data/experiment_subdue_pilot"
-        algorithm = "subdue_python"
+        algorithm = "subdue_python_under_test"
         exp_folder_prefix = experiment_folder_prefix
         run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
                        experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=True, skip_mining=False, skip_evaluation=False)
+                       skip_preparation=False, skip_mining=False, skip_evaluation=False)

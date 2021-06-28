@@ -15,7 +15,7 @@ def run(parameters):
     overlap = '-overlap ' if parameters.overlap is True else ''
 
     undirected = '-undirected ' if parameters.undirected is True else ''
-    eval = '-eval ' if parameters.eval != 1 else ''
+    eval = '-eval 1' if parameters.eval == 1 else '-eval 2'
 
     limit = '-limit ' + str(parameters.limit) if parameters.limit != 0 else ''
     maxsize = '-maxsize ' + str(parameters.maxSize) if parameters.maxSize != 0 else ''
