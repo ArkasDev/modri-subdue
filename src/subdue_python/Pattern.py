@@ -29,6 +29,9 @@ class Pattern:
             self.evaluate_compression_via_heuristic(graph_input)
         if eval == 2:
             self.evaluate_compression_via_size(graph_input, overlap)
+        if eval == 3:
+            self.evaluate_compression_via_size_wo_preserved(graph_input, overlap)
+
 
     def evaluate_compression_via_heuristic(self, graph_input):
         """Compute value of using given pattern to compress given graph, where 0 means no compression, and 1 means perfect compression."""
@@ -44,7 +47,47 @@ class Pattern:
         size = self.calc_size(graph)
         for instance in self.instances:
             size = size + 1
-            size = size - (len(instance.vertices.list_container) + len(instance.edges.list_container))
+            size_of_instance = len(instance.vertices.list_container) + len(instance.edges.list_container)
+            size = size - size_of_instance
+        return size
+
+    def calc_size(self, graph):
+        size = len(graph.vertices) + len(graph.edges)
+        return size
+
+    def evaluate_compression_via_size_wo_preserved(self, graph_input, overlap):
+        size_of_compressed_graph = self.calc_size_of_compressed_graph_wo_preserved(graph_input, overlap)
+        self.value = float(self.calc_size_wo_preserved(graph_input)) / float(self.calc_size_wo_preserved(self.definition) + size_of_compressed_graph)
+
+    # TODO: add overlapping
+    def calc_size_of_compressed_graph_wo_preserved(self, graph, overlap):
+        size = self.calc_size_wo_preserved(graph)
+        for instance in self.instances:
+            size = size + 1
+
+            e = len(instance.edges.list_container)
+            for edge_id in instance.edges.list_container:
+                if "Preserve" in edge_id.attributes['label']:
+                    e = e - 1
+            v = len(instance.vertices.list_container)
+            for v_id in instance.vertices.list_container:
+                if "Preserve" in v_id.attributes['label']:
+                    v = v - 1
+
+            size = size - (v + e)
+        return size
+
+    def calc_size_wo_preserved(self, graph):
+        e = len(graph.edges)
+        for edge_id in graph.edges:
+            if "Preserve" in graph.edges[edge_id].attributes['label']:
+                e = e - 1
+        v = len(graph.vertices)
+        for v_id in graph.vertices:
+            if "Preserve" in graph.vertices[v_id].attributes['label']:
+                v = v - 1
+
+        size = v + e
         return size
 
     def calc_overlap_edges(self):
@@ -64,10 +107,6 @@ class Pattern:
                             num_overlap_edges = num_overlap_edges + 1
 
         return num_overlap_edges
-
-    def calc_size(self, graph):
-        size = len(graph.vertices) + len(graph.edges)
-        return size
 
     def print_pattern(self, tab):
         print(tab + "Pattern (value=" + str(self.value) + ", instances=" + str(len(self.instances)) + "):")

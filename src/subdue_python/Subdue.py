@@ -103,6 +103,8 @@ def subdue(parameters, graph):
             for best_pattern in pattern_list:
                 outputFileName = parameters.outputFileName + "-pattern-" + str(i) + ".json"
                 best_pattern.definition.write_to_file(outputFileName)
+                with open(parameters.outputFileName + "-pattern-" + str(i) + "_" + str(best_pattern.value), "w") as f:
+                    f.write(str(best_pattern.value))
                 i = i + 1
 
             # if (parameters.writePattern):
@@ -198,7 +200,11 @@ def substructure_discover(parameters, graph):
                 plot_graphs([pattern_nx], path + name)
 
         # iterate parent patterns
-        while (parent_pattern_list):
+        # https://stackoverflow.com/questions/6022764/python-removing-list-element-while-iterating-over-list?noredirect=1&lq=1
+        #
+        copy_of_parent_pattern_list = [x for x in parent_pattern_list]
+        for parent_pattern in list(parent_pattern_list):
+        #while (parent_pattern_list):
 
             if parameters.beamSearchDebugging:
                 print(colored("-----------------------------", "green"))
@@ -206,31 +212,32 @@ def substructure_discover(parameters, graph):
                 print("limit: " + str(pattern_count))
                 print("parent patterns: " + str(len(parent_pattern_list)))
 
-            parentPattern = parent_pattern_list.pop(0)
+
+         #   parentPattern = parent_pattern_list.pop(0)
 
             if parameters.beamSearchDebugging:
                 step = "3. current"
-                value = "%.4f" % parentPattern.value
+                value = "%.4f" % parent_pattern.value
                 path = parameters.experimentFolder + "/beam_search/" + step + "/parent/" + str(
                         root_count) + "_" + str(
                         pattern_count) + "/"
                 name = "c_" + str(value) + \
-                           "__i_" + str(len(parentPattern.instances)) + \
+                           "__i_" + str(len(parent_pattern.instances)) + \
                            "__" + str(randrange(1000))
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                parentPattern.write_pattern_to_file(path + name + ".json")
+                parent_pattern.write_pattern_to_file(path + name + ".json")
                 pattern_nx = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
                         path + name + ".json")
                 plot_graphs([pattern_nx], path + name)
 
             # TODO: > 1 sinn? warum auf parent und nicht extended
-            if ((len(parentPattern.instances) > 1) and (pattern_count < parameters.limit) and len(parentPattern.definition.edges) + 1 <= parameters.maxSize):
+            if ((len(parent_pattern.instances) > 1) and (pattern_count < parameters.limit) and len(parent_pattern.definition.edges) + 1 <= parameters.maxSize):
                 pattern_count += 1
 
                 if parameters.beamSearchDebugging:
                     print("start expansion...")
 
-                extendedPatternList = Pattern.ExtendPattern(parameters, parentPattern)
+                extendedPatternList = Pattern.ExtendPattern(parameters, parent_pattern)
 
                 if parameters.beamSearchDebugging:
                     step = "2. expansion"
@@ -273,12 +280,12 @@ def substructure_discover(parameters, graph):
 
 
                     if parameters.beamSearchDebugging:
-                        print("compression before: " + str(parentPattern.value) + ", after: " + str(extendedPattern.value))
+                        print("compression before: " + str(parent_pattern.value) + ", after: " + str(extendedPattern.value))
 
                     # prune = false --> add pattern to child patterns
                     # prune = true --> add pattern to child patterns only if the extended pattern has higher compression
                     # child pattern are used for the next expansion
-                    if ((not parameters.prune) or (extendedPattern.value >= parentPattern.value)):
+                    if ((not parameters.prune) or (extendedPattern.value >= parent_pattern.value)):
                         Pattern.PatternListInsert(extendedPattern, childPatternList, parameters.beamWidth, parameters.valueBased)
                         if parameters.beamSearchDebugging:
                              print(colored("Add extended pattern to child patterns", "grey"))
@@ -290,8 +297,8 @@ def substructure_discover(parameters, graph):
                     print("Limit reached, no expansion anymore")
 
             # add parent pattern to final discovered list
-            if (len(parentPattern.definition.edges) >= parameters.minSize):
-                Pattern.PatternListInsert(parentPattern, discoveredPatternList, parameters.numBest, False)
+            if (len(parent_pattern.definition.edges) >= parameters.minSize):
+                Pattern.PatternListInsert(parent_pattern, discoveredPatternList, parameters.numBest, False)
                 if parameters.beamSearchDebugging:
                     print("Add the parent pattern to the final patterns")
             else:
@@ -358,7 +365,7 @@ def substructure_discover(parameters, graph):
                 print(colored("discovered patterns: " + str(len(discoveredPatternList)), "blue"))
                 print(colored("parent patterns: " + str(len(parent_pattern_list)), "blue"))
                 print(colored("child patterns: " + str(len(childPatternList)), "blue"))
-
+                
         if parameters.beamSearchDebugging:
             print(colored("Parent pattern loop finished", "magenta"))
 

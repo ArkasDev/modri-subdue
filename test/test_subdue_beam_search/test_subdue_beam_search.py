@@ -2,16 +2,19 @@ import os
 
 import experiment_scripts
 import experiment_scripts.compute_components as compute
+import subdue_python.Pattern as Pattern
+import subdue_python.Graph as Graph
 from experiment_scripts.evaluation import plot_graphs
 from subdue_python import Subdue, Parameters
+import json
 
 # positive example
 # beamWidth=3 iterations=1 limit=30 maxSize=7 minSize=4 numBest=1 overlap='vertex' eval=1
-# data_set = "SingleEO_10_eo1_p0,1"
+data_set = "SingleEO_10_eo1_p0,1"
 
 # negative example
-# beamWidth=3 iterations=1 limit=30 maxSize=7 minSize=4 numBest=1 overlap='vertex' eval=1
-data_set = "SingleEO_10_eo97_p0,5"
+# beamWidth=10 iterations=1 limit=0 maxSize=0 minSize=4 numBest=3 overlap='vertex' eval=1
+# data_set = "SingleEO_10_eo97_p0,5"
 
 
 def before():
@@ -45,19 +48,23 @@ def before():
         os.remove(os.path.join(data_set + '/beam_search/4. result', f))
 
 
+parameters = Parameters.Parameters()
+
+
 def run_subdue_python(experiment_path, graph_file):
     graph = Subdue.read_graph(graph_file)
 
-    parameters = Parameters.Parameters()
+    global parameters
+
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 10
+    parameters.beamWidth = 3
     parameters.iterations = 1
     parameters.limit = 0
     parameters.maxSize = 0
     parameters.minSize = 4
-    parameters.numBest = 3
+    parameters.numBest = 1
     parameters.overlap = 'vertex'
 
     parameters.eval = 1
@@ -84,13 +91,36 @@ if __name__ == "__main__":
     graph = data_set + "/connected_components.json"
     run_subdue_python(data_set, graph)
 
-    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(data_set + "/subdue_python.output-pattern-1.json")
-    plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-1")
+    # Plot best patterns
 
-    correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
-        data_set + "/subdue_python.output-pattern-2.json")
-    plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-2")
+    # correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(data_set + "/subdue_python.output-pattern-1.json")
+    # plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-1")
+    #
+    # correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
+    #     data_set + "/subdue_python.output-pattern-2.json")
+    # plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-2")
 
     correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
         data_set + "/subdue_python.output-pattern-0.json")
     plot_graphs([correct_nx_graph], data_set + "/subdue_python.output-pattern-0")
+
+    # Plot correct graph and calc benchmark
+
+    # with open(data_set + "/connected_components.json", 'r') as graph_file:
+    #     json_graph = json.load(graph_file)
+    #     con_graph = Graph.Graph()
+    #     con_graph.load_from_json(json_graph)
+    #
+    # with open("correct_graph.json", 'r') as correct_pattern_file:
+    #     json_pattern_graph = json.load(correct_pattern_file)
+    #     pattern_graph = Graph.Graph()
+    #     pattern_graph.load_from_json(json_pattern_graph)
+    #
+    # pattern = Pattern.Pattern()
+    # pattern.definition = pattern_graph
+    # pattern.evaluate(con_graph, parameters.eval, False)
+    #
+    # correct_nx_graph = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph("correct_graph.json")
+    # plot_graphs([correct_nx_graph], data_set + "/correct_graph_" + str(pattern.value))
+
+
