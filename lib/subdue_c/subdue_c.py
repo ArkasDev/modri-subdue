@@ -22,6 +22,10 @@ def run(parameters):
 
     subdue_lib_windows_location = parameters.subdue_lib_windows_location
 
+    # parameters.outputFileName = "C:\\Users\\david\\PycharmProjects\\theobald-subdue\\data\\experiment_subdue_c\\SingleEO_10_eo1_p0,1\\test"
+    # parameters.outputFileName = "C:/Users/david/PycharmProjects/theobald-subdue/data/experiment_subdue_c/SingleEO_10_eo1_p0,1/test"
+    # print(parameters.outputFileName)
+
     if not os.path.isfile(subdue_lib_windows_location):
         raise Exception("Subdue C lib could not found.")
 
@@ -30,6 +34,7 @@ def run(parameters):
 
     if os.name == "nt":
         os.system(subdue_lib_windows_location + ' '
+                  '-out ' + parameters.outputFileName + ' '
                   '-beam ' + str(parameters.beamWidth) + ' '
                   '' + eval + ' '
                   '-minsize ' + str(parameters.minSize) + ' '
@@ -41,5 +46,5 @@ def run(parameters):
                   '' + overlap + ''
                   '' + value_based + ''
                   '' + prune + ''
-                  '-out ' + parameters.outputFileName + ' '
-                  '' + graph)
+                  '' + graph
+                  )

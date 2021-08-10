@@ -64,7 +64,7 @@ class ParsemisMiner:
 
     def __init__(self, data_location, mine_undirected=True, debug=True):
         self.data_location = data_location
-        self.lib_location = "%s/lib/" % os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+        self.lib_location = "%s/lib/parsemis/" % os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
         self.parsemis_location = self.lib_location + "parsemis.jar"
 
         if debug:
@@ -128,7 +128,8 @@ class ParsemisMiner:
             commands.append("--maximumFrequency=%i" % kwargs.get('maximum_frequency'))
 
         print(commands)
-        subprocess.call(commands)
+        proc = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
+        # subprocess.call(commands)
 
     def write_lg(self, graphs):
         print("Writing graphs to %s" % self.input_file)

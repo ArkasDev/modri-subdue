@@ -1,13 +1,14 @@
 import pickle
 
-import experiment_scripts.compute_components
-from experiment_scripts.evaluation import get_position_sorted_list
-from experiment_scripts.evaluation import plot_graphs
-import experiment_scripts.compute_components as compute
+import src.experiment_scripts.compute_components
+from src import experiment_scripts
+from src.experiment_scripts.evaluation import get_position_sorted_list
+from src.experiment_scripts.evaluation import plot_graphs
+import src.experiment_scripts.compute_components as compute
 from termcolor import colored
 import os
 from lib.subdue_c import parameters_subdue_c, subdue_c as subdue_c
-from subdue_python import Subdue, Parameters
+from src.subdue_python import Subdue, Parameters
 import lib.subdue_python_1_1_pv_2_7.subdue_python_1_1 as subdue_python_1_1
 
 python_v_2_7_path = "C:\\Python2716\\python.exe"

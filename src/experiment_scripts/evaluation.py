@@ -9,9 +9,9 @@ import functools
 import matplotlib.pyplot as plt
 import networkx as nx
 
-import experiment_scripts.compute_components
-from experiment_scripts.algorithms import is_subgraph_mono, is_label_isomorphic
-from experiment_scripts.compute_components import load_components_networkx
+from src import experiment_scripts
+from src.experiment_scripts.algorithms import is_subgraph_mono, is_label_isomorphic
+from src.experiment_scripts.compute_components import load_components_networkx
 from termcolor import colored
 
 data_set_path = None
@@ -124,7 +124,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
         if algorithm == "subdue_python" or algorithm == "subdue_python_under_test":
             graph = []
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
-                data_set_path + "/subdue_python.output-pattern-1.json")
+                data_set_path + "/subdue_python.output-pattern-0.json")
             graph.append(pattern)
             plot_graphs(graph, data_set_path + "/subdue_pattern_graph")
 
@@ -190,7 +190,7 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python" or algorithm == "subdue_python_under_test":
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
-                data_set_path + "/subdue_python.output-pattern-1.json")
+                data_set_path + "/subdue_python.output-pattern-0.json")
             evaluate_candidates(experiment_path + '/stats_topn.csv', [pattern], "comp")
         elif algorithm == "subdue_c":
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
@@ -295,6 +295,11 @@ def create_subgraph_lattice(frequent_induced_graphs):
     graph_lattice = {}
     # initialize the current size, i.e., the size of the first graph
     current_size = len(next(iter(induced_sgs.keys())).nodes())
+    # a = iter(induced_sgs.keys())
+    # next(a)
+    # current_size = a.nodes()
+
+
     # TODO by connecting only consecutive graphs, we could omit a chain where one subgraph is missing (which could happen in the approximate mining case)
     current_level_graphs = []
     previous_level_graphs = []

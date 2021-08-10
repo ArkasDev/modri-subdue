@@ -193,16 +193,16 @@ def run_subdue_python(experiment_path, graph_file, under_test_implementation=Fal
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 4
     parameters.iterations = 1
     parameters.limit = 50
-    parameters.maxSize = 7
-    parameters.minSize = 4
+    parameters.maxSize = 50
+    parameters.minSize = 3
     parameters.numBest = 1
     parameters.overlap = 'vertex'
 
     # only for under test
-    parameters.eval = 1
+    parameters.eval = 4
 
     parameters.prune = False
     parameters.valueBased = False
@@ -238,7 +238,7 @@ def run_subdue_c(experiment_path):
     parameters.numBest = 1
     parameters.overlap = True
 
-    parameters.eval = 1
+    parameters.eval = 2
     parameters.undirected = True
     parameters.prune = False
     parameters.valueBased = False
@@ -300,7 +300,7 @@ def run_gspan(experiment_path, graph, threshold):
         store_embeddings=True,
         distribution="threads",
         n_threads=1,
-        algorithm="gpsan"
+        algorithm="gspan"
     )
 
 
