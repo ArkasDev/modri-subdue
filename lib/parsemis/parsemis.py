@@ -65,7 +65,7 @@ class ParsemisMiner:
     def __init__(self, data_location, mine_undirected=True, debug=True):
         self.data_location = data_location
         self.lib_location = "%s/lib/" % os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-        self.parsemis_location = self.lib_location + "parsemis.jar"
+        self.parsemis_location = self.lib_location + "parsemis/parsemis.jar"
 
         if debug:
             self.debug_statement = "-Dverbose=true"
@@ -76,11 +76,14 @@ class ParsemisMiner:
 
         self.input_file = "%s/connected_components.lg" % self.data_location
         self.output_file = "%s/fsg.output" % self.data_location
+        print("Input: %s" % self.input_file)
+        print("Output: %s" % self.output_file)
+
 
     def mine_graphs(self, graphs, **kwargs):
-        print("Mining %i graphs" % len(graphs))
+        #print("Mining %i graphs" % len(graphs))
         self.perform_mining(**kwargs)
-        return self.read_graph(graphs)
+        #return self.read_graph(graphs)
 
     def write_graph(self, graphs):
         if self.mine_undirected:
@@ -96,7 +99,7 @@ class ParsemisMiner:
 
     def perform_mining(self, **kwargs):
         commands = ['java', '-jar',
-                    "-Xmx10g",
+                    "-Xmx1g",
                     self.parsemis_location,
                     "--graphFile=%s" % self.input_file,
                     "--outputFile=%s" % self.output_file,
@@ -128,7 +131,10 @@ class ParsemisMiner:
             commands.append("--maximumFrequency=%i" % kwargs.get('maximum_frequency'))
 
         print(commands)
-        subprocess.call(commands)
+        output,error = subprocess.Popen(commands,stdout = subprocess.PIPE, stderr= subprocess.PIPE).communicate()
+        #process = subprocess.call(commands)
+        print(output)
+        print(error)
 
     def write_lg(self, graphs):
         print("Writing graphs to %s" % self.input_file)

@@ -4,6 +4,10 @@ import json
 import networkx as nx
 from networkx.readwrite import json_graph
 import numpy as np
+import re
+
+INPUT_FORMAT_NX = "NX"
+INPUT_FORMAT_LG = "LG"
 
 
 def connected_components(graph):
@@ -117,6 +121,7 @@ def export_subdue_python_json(graph_db, path):
         output_graph_file.write(']\n')
 
 
+# TODO use get_graph_components here
 # TODO this can be done asynchronously using yield
 def load_components_networkx(folder, filtered=False):
     components = []
@@ -137,6 +142,17 @@ def load_components_networkx(folder, filtered=False):
             components += new_components
     return components, nb_of_components_per_diff
 
+def get_graph_components(graphs, filtered=False):
+    components = []
+    nb_of_components_per_diff = []
+    for graph in graphs:
+        # Compute connected components for the diff graph
+        new_components = connected_components(graph)
+        if filtered:
+            new_components = filter_too_large(filter_too_many_similar_nodes(new_components))
+        nb_of_components_per_diff.append(len(new_components))
+        components += new_components
+    return components, nb_of_components_per_diff
 
 # TODO use some pattern to apply multiple filters
 # Filters components with more than nb_nodes/nb_edges nodes/edges. Use -1 for infinity.
@@ -237,6 +253,53 @@ def convert_node_link_graph_to_subdue_python_graph(input_file, output_file):
         the_file.write(']\n')
 
 
+def load_as_line_graph(input_file):
+    regex_header = r"t # (.*)"
+    regex_node = r"v (\d+) (.+).*"
+    regex_edge = r"e (\d+) (\d+) (.+).*"
+    
+    graphs = []
+
+    
+    # regex_embedding = r"#=> (\d+) .*"
+    # support_set = set()
+
+    with open(input_file, 'r') as input_graphs:
+        lines = input_graphs.readlines()
+    
+    # if tlv header continue parsing
+    if re.match(regex_header, lines[0]):
+        pass
+    else:
+        print("Error parsing graph db. Expecting TLV.")
+        return []
+    
+    graph = None
+    for next_line in lines:
+        match_header = re.match(regex_header, next_line)
+        if match_header:
+            if graph is not None:
+                graphs.append(graph)
+            graph = nx.Graph(label=match_header.group(1))
+            continue
+
+        match_node = re.match(regex_node, next_line)
+        match_edge = re.match(regex_edge, next_line)
+        #match_embedding = re.match(regex_embedding, next_line)
+
+        if match_node:
+            graph.add_node(int(match_node.group(1)), label=str(match_node.group(2)))
+        elif match_edge:
+            graph.add_edge(int(match_edge.group(1)), int(match_edge.group(2)), label=str(match_edge.group(3)))
+        #elif match_embedding:
+        #    support_set.add(int(match_embedding.group(1)))
+
+    # Add also the last graph
+    if graph is not None:
+        graphs.append(graph)
+
+    return graphs
+
 def export_node_link_graph_from_subdue_c_graph(input_file, output_file):
     empty_input = False
     with open(output_file, 'w') as output:
@@ -310,10 +373,15 @@ def convert_node_link_graph_to_nx_graph(file):
     return graph
 
 
-def main(args):
-    set_name = args
+def main(set_name, formatting=INPUT_FORMAT_NX):
+
     # Load components
-    components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
+    if formatting == INPUT_FORMAT_NX:
+        components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
+    if formatting == INPUT_FORMAT_LG:
+        graphs = load_as_line_graph(set_name+'/diffgraphs/db.lg' )
+        components, nb_of_components_per_diff = get_graph_components(graphs)
+
     # Exports
     export_TLV(components, set_name + '/connected_components.lg')
     export_aids(components, set_name + '/connected_components.aids')
