@@ -251,7 +251,7 @@ def run_gaston(experiment_path, graph, threshold):
         graph,
         minimum_frequency=threshold,
         maximum_node_count=64,
-        minimum_node_count=2,
+        minimum_node_count=13,
         store_embeddings=True,
         distribution="local",
         n_threads=1,
@@ -294,7 +294,7 @@ def compute_threshold(aids_file_path):
     # num_lines = sum(1 for _ in open(aids_file_path))
     # number_of_components = num_lines / 3
     # return math.ceil(relative_threshold * number_of_components)
-    return 50
+    return 55
 
 
 def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
