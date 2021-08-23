@@ -5,7 +5,6 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import numpy as np
 
-
 def connected_components(graph):
     components = [graph.subgraph(c).copy() for c in nx.connected_components(graph)]
     return components
@@ -16,16 +15,53 @@ def export_TLV(graph_db, path):
     f = open(path, 'w')
     i = 0
     for graph in graph_db:
-        f.write('t # ' + str(i) + '\r')
+        f.write('t # ' + str(i) + '\n')
         temp_graph = nx.convert_node_labels_to_integers(graph, first_label=0)
         # sort indices
         vertices = temp_graph.nodes(data=True)
         for node, data in vertices:
-            f.write("v " + str(node) + " " + data['label'] + '\r')
+            f.write("v " + str(node) + " " + data['label'] + '\n')
         edges = temp_graph.edges(data=True)
         for source, target, data in edges:
-            f.write("e " + str(source) + " " + str(target) + " " + data['label'] + '\r')
+            f.write("e " + str(source) + " " + str(target) + " " + data['label'] + '\n')
+            # TODO REMOVE IF WRONG
+            # f.write("e " + str(target) + " " + str(source) + " " + data['label'] + '\n')
         i = i + 1
+    f.close()
+
+
+def export_TLV_numeric_labels(graph_db, path, label_path):
+    f = open(path, 'w')
+    i = 0
+    labels = {}
+    current = 1
+    edge_count = 100
+    for graph in graph_db:
+        f.write('t # ' + str(i) + '\n')
+        temp_graph = nx.convert_node_labels_to_integers(graph, first_label=0)
+        # sort indices
+        vertices = temp_graph.nodes(data=True)
+        for node, data in vertices:
+            label = data['label']
+            if label not in labels:
+                labels[label] = current
+                current += 1
+            f.write("v " + str(node) + " " + str(labels[label]) + '\n')
+        edges = temp_graph.edges(data=True)
+        for source, target, data in edges:
+            label = data['label']
+            if label not in labels:
+                labels[label] = current
+                current += 1
+            f.write("e " + str(source) + " " + str(target) + " " + str(labels[label]) + '\n')
+            # TODO REMOVE IF WRONG
+            # f.write("e " + str(target) + " " + str(source) + " " + str(labels[label]) + '\n')
+        i = i + 1
+    f.close()
+
+    f = open(label_path, 'w')
+    for k, v in labels.items():
+        f.write(k + " " + str(v) + '\n')
     f.close()
 
 
@@ -316,6 +352,7 @@ def main(args):
     components, nb_of_components_per_diff = load_components_networkx(set_name + '/diffgraphs', filtered=True)
     # Exports
     export_TLV(components, set_name + '/connected_components.lg')
+    export_TLV_numeric_labels(components, set_name + '/connected_components_numeric.lg', set_name + '/labels.out')
     export_aids(components, set_name + '/connected_components.aids')
     export_subdue_c_graph(components, set_name + '/connected_components.g')
     export_subdue_python_json(components, set_name + '/connected_components.json')

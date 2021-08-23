@@ -4,8 +4,12 @@ import re
 import sys
 import os
 import os.path
+import textwrap
 import time
 import functools
+from math import sqrt
+
+import matplotlib.patches
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -13,6 +17,7 @@ import experiment_scripts.compute_components
 from experiment_scripts.algorithms import is_subgraph_mono, is_label_isomorphic
 from experiment_scripts.compute_components import load_components_networkx
 from termcolor import colored
+from experiment_scripts.compute_components import export_TLV
 
 data_set_path = None
 experiment_path = None
@@ -75,30 +80,32 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
     if (algorithm == "gaston") or (algorithm == "gspan"):
         # Import the frequent trees dict with key=freq and value = dict with key=size and value = list of trees with freq and size
         print("Loading graphs from file...")
-        graphs = import_tlv(data_set_path + "/fsg.output")
+        graphs = import_tlv(os.path.join(data_set_path, 'fsg.output'))
+        # graphs = import_tlv_numeric(os.path.join(data_set_path, 'fsg_numeric.output.t0'), os.path.join(data_set_path, 'labels.out'), data_set_path)
+        # graphs = import_tlv_numeric(os.path.join(data_set_path, 'connected_components_numeric.lg.fp'), os.path.join(data_set_path, 'labels.out'), data_set_path)
 
-        print("Sorting for compression...")
-        # sort for compression (first freq then compression)
-        graphs_compression = {k: v for k, v in sorted(graphs.items(), key=lambda item: item[1], reverse=True)}
-        graphs_compression = {k: (v - 1) * (len(k.nodes()) + len(k.edges())) for k, v in
-                              sorted(graphs_compression.items(),
-                                     key=lambda item: (item[1] - 1) * (len(item[0].nodes()) + len(item[0].edges())),
-                                     reverse=True)}
+        # print("Sorting for compression...")
+        # # sort for compression (first freq then compression)
+        # graphs_compression = {k: v for k, v in sorted(graphs.items(), key=lambda item: item[1], reverse=True)}
+        # graphs_compression = {k: (v - 1) * (len(k.nodes()) + len(k.edges())) for k, v in
+        #                       sorted(graphs_compression.items(),
+        #                              key=lambda item: (item[1] - 1) * (len(item[0].nodes()) + len(item[0].edges())),
+        #                              reverse=True)}
 
         print("Sorting for frequency...")
-        # sort for size and frequency (first compression then frequency)
+        # # sort for size and frequency (first compression then frequency)
         graphs_frequency = {k: v for k, v in
                             sorted(graphs.items(), key=lambda item: len(item[0].nodes()) + len(item[0].edges()),
                                    reverse=True)}
         graphs_frequency = {k: v for k, v in sorted(graphs_frequency.items(), key=lambda item: item[1], reverse=True)}
 
         # compression based
-        print("Eval compression based...")
-        sg_lattice = create_subgraph_lattice(graphs_compression)
-        sorted_recommendation_pruned, lattice_pruned = lattice_pruned_list_sorted(sg_lattice, best_compression,
-                                                                                  compression_key)
+        # print("Eval compression based...")
+        # sg_lattice = create_subgraph_lattice(graphs_compression)
+        # sorted_recommendation_pruned, lattice_pruned = lattice_pruned_list_sorted(sg_lattice, best_compression,
+        #                                                                           compression_key)
 
-        # frequency based
+        # # frequency based
         print("Eval frequency based...")
         sg_lattice_f = create_subgraph_lattice(graphs_frequency)
         sorted_recommendation_pruned_f, lattice_pruned_f = lattice_pruned_list_sorted(sg_lattice_f, best_frequency,
@@ -106,10 +113,10 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 
         ################################## PRINT GRAPHS ############################################
         # print as dictionary parent with children
-        print_results(lattice_pruned, sg_lattice, 10, lambda element: compression_key(sg_lattice, element),
-                      10, label="compression", export_pickle=True)
-        print_results(lattice_pruned_f, sg_lattice, 10, lambda element: frequency_key(sg_lattice, element),
-                      10, label="frequency", export_pickle=True)
+        # print_results(lattice_pruned, sg_lattice, 238, lambda element: compression_key(sg_lattice, element),
+        #               238, label="compression", export_pickle=False)
+        print_results(lattice_pruned_f, sg_lattice_f, 238, lambda element: frequency_key(sg_lattice_f, element),
+                      238, label="frequency", export_pickle=False)
 
     else:
         print("Skip compression and frequency computation for subdue")
@@ -150,18 +157,26 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
                 plot_graphs(graph, data_set_path + "/subdue_1_1_pattern_graph")
 
         # Load and plot the correct graph
-        correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
-        correct_graph_2 = pickle.load(open(experiment_path + "./correct_graph_2_networkx.p", "rb"))
-
-        if correct_graph_1 is None or correct_graph_2 is None:
-            print(colored("Error: correct graph could not be loaded", "red"))
+        # correct_graph_1 = pickle.load(open(experiment_path + "/correct_graph_networkx.p", "rb"))
+        # correct_graph_2 = pickle.load(open(experiment_path + "./correct_graph_2_networkx.p", "rb"))
+        #
+        # if correct_graph_1 is None or correct_graph_2 is None:
+        #     print(colored("Error: correct graph could not be loaded", "red"))
 
         def evaluate_candidates(output_file, candidates, label):
-            score_1 = get_position_sorted_list(correct_graph_1, candidates)
-            score_2 = get_position_sorted_list(correct_graph_2, candidates)
+            # score_1 = get_position_sorted_list(correct_graph_1, candidates)
+            # score_2 = get_position_sorted_list(correct_graph_2, candidates)
             # position = get_position(correct_graph, candidates, key)
             # score = position[0]*(position[1]+1)
             # print_results_list(candidates, 5, label)
+
+            cnt_exact_match_1 = 0
+            cnt_exact_match_2 = 0
+            score_1 = 0
+            score_2 = 0
+            nb_diffs = 0
+            nb_eos = 0
+            pertubation = 0
 
             # number_of_labels = average([len(set([node[1] for node in component.nodes.data('label')])) for component in components])
             nodes_vs_edges = [(len(component.nodes()), len(component.edges())) for component in components]
@@ -172,8 +187,8 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
             # if we want to prune, we need to know look at all graphs but threshold - 1, if we want to avoid looking into huge graphs, what is the smallest size of graph we have to consider?
             components_size_desc = sorted(components, key=lambda component: len(component.nodes()), reverse=True)
             size_at_threshold = len(components_size_desc[threshold - 1].nodes())
-            cnt_exact_match_1 = sum([is_label_isomorphic(correct_graph_1, comp, "label") for comp in components])
-            cnt_exact_match_2 = sum([is_label_isomorphic(correct_graph_2, comp, "label") for comp in components])
+            # cnt_exact_match_1 = sum([is_label_isomorphic(correct_graph_1, comp, "label") for comp in components])
+            # cnt_exact_match_2 = sum([is_label_isomorphic(correct_graph_2, comp, "label") for comp in components])
 
             with open(output_file, 'a') as csvfile:
                 writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
@@ -186,8 +201,9 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
                      score_2])
 
         if (algorithm == "gaston") or (algorithm == "gspan"):
-            evaluate_candidates(experiment_path + '/stats_topn.csv', sorted_recommendation_pruned, "comp")
-            evaluate_candidates(experiment_path + '/stats_topn_frequency.csv', sorted_recommendation_pruned_f, "freq")
+            evaluate_candidates(os.path.join(experiment_path, 'stats_topn.csv'), sorted_recommendation_pruned, "comp")
+            evaluate_candidates(os.path.join(experiment_path, 'stats_topn_frequency.csv'),
+                                sorted_recommendation_pruned_f, "freq")
         elif algorithm == "subdue_python":
             pattern = experiment_scripts.compute_components.convert_node_link_graph_to_nx_graph(
                 data_set_path + "/subdue_python.output-pattern-1.json")
@@ -207,17 +223,57 @@ def main(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10):
 def plot_graphs(S, file_path, labels=True):
     for i in range(len(S)):
         plt.clf()
-        plt.figure(i)
-        plt.margins(0.05, 0.05)
-        pos = nx.spring_layout(S[i], scale=3)
+        plt.figure(num=i, dpi=300, figsize=(6.4015748, 3.598425), frameon=False, clear=True)
+        plt.margins(0.15, 0.15)
+        pos = nx.spring_layout(S[i], scale=10, k=4.0 / sqrt(len(S[i].nodes())), seed=0, iterations=50)
 
         if labels:
-            nx.draw(S[i], pos, node_size=500)
-            node_labels = dict([(v, d['label']) for v, d in S[i].nodes(data=True)])
+            node_labels = dict([(v, "\n".join(textwrap.wrap(d['label'], width=15))) for v, d in S[i].nodes(data=True)])
+            remove_nodes = []
+            preserve_nodes = []
+            add_nodes = []
+            nodes = [(d['label'], v) for v, d in S[i].nodes(data=True)]
+            for j in range(len(nodes)):
+                node_label, node_index = nodes[j]
+                if re.match(r"R_.*", node_label):
+                    remove_nodes.append(node_index)
+                elif re.match(r"P_.*", node_label):
+                    preserve_nodes.append(node_index)
+                elif re.match(r"A_.*", node_label):
+                    add_nodes.append(node_index)
+                else:
+                    raise Exception("Did not match node label")
+
+            nx.draw_networkx_nodes(S[i], pos, nodelist=add_nodes, node_size=750, node_color='green', edgecolors='black')
+            nx.draw_networkx_nodes(S[i], pos, nodelist=remove_nodes, node_size=750, node_color='red', edgecolors='black')
+            nx.draw_networkx_nodes(S[i], pos, nodelist=preserve_nodes, node_size=750, node_color='gray', edgecolors='black')
+
+            # remove_edges = []
+            # preserve_edges = []
+            # add_edges = []
+            # # edges = [d['label'] for s, t, d in S[i].edges(data=True)]
+            # for s, t, d in S[i].edges(data=True):
+            #     if d['label'].startswith('R'):
+            #         remove_edges.append((s, t, d))
+            #     elif d['label'].startswith('P'):
+            #         preserve_edges.append((s, t, d))
+            #     elif d['label'].startswith('A'):
+            #         add_edges.append((s, t, d))
+            #     else:
+            #         raise Exception("Did not match edge label")
+            # nx.draw_networkx_edges(S[i], pos, remove_edges, arrows=True, arrowsize=7, arrowstyle='->',
+            #                        edge_color='red', min_source_margin=13, min_target_margin=13)
+            # nx.draw_networkx_edges(S[i], pos, preserve_edges, arrows=True, arrowsize=7, arrowstyle='->',
+            #                        edge_color='gray', min_source_margin=13, min_target_margin=13)
+            # nx.draw_networkx_edges(S[i], pos, add_edges, arrows=True, arrowsize=7, arrowstyle='->',
+            #                        edge_color='green', min_source_margin=13, min_target_margin=13)
+            # nx.draw_networkx_edges(S[i], pos, arrows=True, arrowsize=7, arrowstyle='->', min_source_margin=13, min_target_margin=13)
+            nx.draw_networkx_edges(S[i], pos, arrows=False)
+
             y_off = 0.02
-            nx.draw_networkx_labels(S[i], pos={k: ([v[0], v[1] + y_off]) for k, v in pos.items()}, font_size=6,
-                                    labels=node_labels)
-            nx.draw_networkx_edge_labels(S[i], pos, font_size=6)
+            # nx.draw_networkx_labels(S[i], pos={k: ([v[0], v[1] + y_off]) for k, v in pos.items()}, font_size=6, labels=node_labels)
+            nx.draw_networkx_labels(S[i], pos, font_size=3, labels=node_labels)
+            # nx.draw_networkx_edge_labels(S[i], pos, font_size=6)
         else:
             nx.draw(S[i], pos, node_size=20)
 
@@ -227,7 +283,7 @@ def plot_graphs(S, file_path, labels=True):
             save_path = file_path + ".png"
 
         # Save
-        plt.savefig(save_path, format="PNG")
+        plt.savefig(save_path, format="PNG", bbox_inches='tight')
 
 
 # eval script
@@ -278,9 +334,54 @@ def import_tlv(path):
                 graph.add_edge(int(match_edge.group(1)), int(match_edge.group(2)), label=str(match_edge.group(3)))
             elif match_embedding:
                 support_set.add(int(match_embedding.group(1)))
+            else:
+                raise Exception("Did not match")
             next_line = graph_db.readline()
         graphs[graph] = len(support_set)
         next_line = graph_db.readline()
+    return graphs
+
+
+def import_tlv_numeric(path, label_path, data_set_path):
+    graph_db = open(path, 'r')
+    next_line = graph_db.readline()
+    graphs = {}
+    regex_header = r"t # \d+ \* (\d+)"
+    regex_node = r"v (\d+) (.+).*"
+    regex_edge = r"e (\d+) (\d+) (.+).*"
+    regex_x = r"x: .*"
+
+    if match_header := re.match(regex_header, next_line):
+        support = int(match_header.group(1))
+        next_line = graph_db.readline()
+    else:
+        print("Error parsing graph db. Expecting TLV.")
+        return {}
+
+    # TODO
+    f = open(label_path, 'r')
+    y = {}
+    while xx := f.readline():
+        if match := re.match(r"(.*) (\d+)", xx):
+            y[int(match.group(2))] = str(match.group(1))
+        else:
+            raise Exception("Did not match")
+
+    while next_line:
+        graph = nx.Graph()
+        while next_line and not (match_header := re.match(regex_header, next_line)):
+            if match_node := re.match(regex_node, next_line):
+                graph.add_node(int(match_node.group(1)), label=y[int(match_node.group(2))])
+            elif match_edge := re.match(regex_edge, next_line):
+                graph.add_edge(int(match_edge.group(1)), int(match_edge.group(2)), label=y[int(match_edge.group(3))])
+            next_line = graph_db.readline()
+        graphs[graph] = support
+        if match_header:
+            support = int(match_header.group(1))
+        next_line = graph_db.readline()
+
+    export_TLV(graphs.copy(), os.path.join(data_set_path, 'fsg.output'))
+
     return graphs
 
 
@@ -293,12 +394,19 @@ def create_subgraph_lattice(frequent_induced_graphs):
     # used to store the graphs, their frequency and their direct (i.e., #nodes - 1) subgraphs
     # {key: graph, value: [compression, frequency, list of direct subgraphs]}
     graph_lattice = {}
+
+    for key, value in induced_sgs.items():
+        graph_lattice[key] = [(value - 1) * (len(key.nodes()) + len(key.edges())), value, []]
+
     # initialize the current size, i.e., the size of the first graph
+    total = len(induced_sgs.items())
+    current = 0
     current_size = len(next(iter(induced_sgs.keys())).nodes())
     # TODO by connecting only consecutive graphs, we could omit a chain where one subgraph is missing (which could happen in the approximate mining case)
     current_level_graphs = []
     previous_level_graphs = []
     for key, value in induced_sgs.items():
+        print('Loop %d/%d' % (current, total))
         number_of_nodes = len(key.nodes())
         # determine if next level has been reached
         if number_of_nodes < current_size:
@@ -326,6 +434,7 @@ def create_subgraph_lattice(frequent_induced_graphs):
             if is_subgraph_mono(graph, key):
                 graph_lattice[key][2].append(graph)
         current_level_graphs.append(key)
+        current += 1
     end = time.time()
     print("Creating lattice took " + str(end - start) + " seconds")
     return graph_lattice
@@ -373,14 +482,13 @@ def best_frequency(lattice):
     return best_pruned_using_sorting(lattice, lambda item: item[1][1], reverse=True)
 
 
-def print_single(lattice, graph, label, label_draw, export_pickle=False):
+def print_single(lattice, graph, label, export_pickle=False):
     if print_results_bool:
         print("Frequency: " + str(lattice[graph][1]))
         print("Compression: " + str(lattice[graph][0]))
-    file_path = data_set_path + '/results/' + label
-    file_path_drawing = data_set_path + '/results/' + label_draw
+    file_path = os.path.join(data_set_path, "results", label)
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    plot_graphs([graph], file_path_drawing)
+    plot_graphs([graph], file_path)
     if export_pickle:
         pickle.dump(graph, open(file_path + ".p", "wb"))
 
@@ -394,15 +502,15 @@ def print_results(pruned_lattice, original_lattice, top_k, good_children_sorting
             break
         if print_results_bool:
             print("-----------LEADING GRAPH------------------")
-            print_single(original_lattice, key, label + "/" + str(position) + ":0", label + "/" + str(position) + "_0",
-                         export_pickle=export_pickle)
+            # print_single(original_lattice, key, os.path.join(label, str(position) + "_0"), export_pickle=export_pickle)
+            print_single(original_lattice, key, os.path.join(label, '%d_0_%d_%d' % (
+                position, original_lattice[key][1], original_lattice[key][0])), export_pickle=export_pickle)
             print("-----------Good children:----------------")
         # get the "good children" and sort them
         value.sort(key=good_children_sorting, reverse=True)
         child_position = 1
         for child in value[:max_good_children]:
-            print_single(original_lattice, child, label + "/" + str(position) + ":" + str(child_position),
-                         label + "/" + str(position) + "_" + str(child_position),
+            print_single(original_lattice, child, os.path.join(label, str(position) + "_" + str(child_position)),
                          export_pickle=export_pickle)
             child_position += 1
         position += 1

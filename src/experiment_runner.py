@@ -65,28 +65,29 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
 
         # Create graph input files via compute component script
         # These graph files are required as input for the mining graph algorithms
-        compute.main(experiment_data_set_path + "/" + single_set_name)
+        compute.main(os.path.join(experiment_data_set_path, single_set_name))
 
         # Compute threshold required for the mining phase of the frequent subgraph mining algorithms
-        threshold = compute_threshold(experiment_data_set_path + "/" + single_set_name + "/connected_components.aids")
+        threshold = compute_threshold(
+            os.path.join(experiment_data_set_path, single_set_name, 'connected_components.aids'))
 
         # Save the threshold for the execution of frequent subgraph mining algorithms
-        with open(experiment_data_set_path + "/" + single_set_name + "/threshold.txt", 'w') as threshold_file:
+        with open(os.path.join(experiment_data_set_path, single_set_name, 'threshold.txt'), 'w') as threshold_file:
             threshold_file.write(str(threshold))
 
         # Create empty output graph file so that after the mining phase of each single data set the output graph can be written
-        with open(experiment_data_set_path + "/" + single_set_name + "/fsg.output", 'w') as output_graph_file:
+        with open(os.path.join(experiment_data_set_path, single_set_name, 'fsg.output'), 'w') as output_graph_file:
             output_graph_file.write("")
 
         # Plot correct graphs
-        graph = []
-        correct_graph_1 = pickle.load(open(experiment_data_set_path + "/correct_graph_networkx.p", "rb"))
-        graph.append(correct_graph_1)
-        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph")
-        graph = []
-        correct_graph_2 = pickle.load(open(experiment_data_set_path + "/correct_graph_2_networkx.p", "rb"))
-        graph.append(correct_graph_2)
-        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph_2")
+        # graph = []
+        # correct_graph_1 = pickle.load(open(os.path.join(experiment_data_set_path, 'correct_graph_networkx.p'), 'rb'))
+        # graph.append(correct_graph_1)
+        # evaluation.plot_graphs(graph, os.path.join(experiment_data_set_path, 'correct_graph'))
+        # graph = []
+        # correct_graph_2 = pickle.load(open(os.path.join(experiment_data_set_path, 'correct_graph_2_networkx.p'), 'rb'))
+        # graph.append(correct_graph_2)
+        # evaluation.plot_graphs(graph, os.path.join(experiment_data_set_path, 'correct_graph_2'))
 
     print("Preparation done")
 
@@ -117,14 +118,14 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
         # Run the selected graph mining algorithm
         if algorithm == "gaston":
             # Load the aggregated graph of all diffs of this single data set
-            graph = experiment_data_set_path + "/%s/connected_components.lg" % single_set_name
+            graph = os.path.join(experiment_data_set_path, single_set_name, "connected_components.lg")
             # Run Gaston
-            run_gaston(experiment_data_set_path + "/" + single_set_name, graph, threshold)
+            run_gaston(os.path.join(experiment_data_set_path, single_set_name), graph, threshold)
         if algorithm == "gspan":
             # Load the aggregated graph of all diffs of this single data set
-            graph = experiment_data_set_path + "/%s/connected_components.lg" % single_set_name
+            graph = os.path.join(experiment_data_set_path, single_set_name, 'connected_components.lg')
             # Run Gspan
-            run_gspan(experiment_data_set_path + "/" + single_set_name, graph, threshold)
+            run_gspan(os.path.join(experiment_data_set_path, single_set_name), graph, threshold)
         if algorithm == "subdue_python":
             # Load the aggregated graph of all diffs of this single data set
             graph = experiment_data_set_path + "/%s/connected_components.json" % single_set_name
@@ -249,32 +250,51 @@ def run_gaston(experiment_path, graph, threshold):
     ParsemisMiner(experiment_path, debug=False, mine_undirected=False).mine_graphs(
         graph,
         minimum_frequency=threshold,
-        maximum_node_count=12,
-        minimum_node_count=4,
+        maximum_node_count=64,
+        minimum_node_count=2,
         store_embeddings=True,
-        distribution="threads",
+        distribution="local",
         n_threads=1,
-        algorithm="gaston"
+        algorithm="gaston",
+        close_graph=True
     )
 
 
 def run_gspan(experiment_path, graph, threshold):
-    ParsemisMiner(experiment_path, debug=False, mine_undirected=False).mine_graphs(
+    ParsemisMiner(experiment_path, debug=True, mine_undirected=False).mine_graphs(
         graph,
         minimum_frequency=threshold,
-        maximum_node_count=12,
-        minimum_node_count=4,
+        maximum_node_count=64,
+        minimum_node_count=2,
         store_embeddings=True,
-        distribution="threads",
+        distribution="local",
         n_threads=1,
-        algorithm="gpsan"
+        algorithm="gspan",
+        connectedFragments=True,
+        close_graph=True
     )
 
 
+# n:15, m: 1, m*(n-m):14
+# n:15, m: 2, m*(n-m):26
+# n:15, m: 3, m*(n-m):36
+# n:15, m: 4, m*(n-m):44
+# n:15, m: 5, m*(n-m):50
+# n:15, m: 6, m*(n-m):54
+# n:15, m: 7, m*(n-m):56
+# n:15, m: 8, m*(n-m):56
+# n:15, m: 9, m*(n-m):54
+# n:15, m:10, m*(n-m):50
+# n:15, m:11, m*(n-m):44
+# n:15, m:12, m*(n-m):36
+# n:15, m:13, m*(n-m):26
+# n:15, m:14, m*(n-m):14
+
 def compute_threshold(aids_file_path):
-    num_lines = sum(1 for _ in open(aids_file_path))
-    number_of_components = num_lines / 3
-    return math.ceil(relative_threshold * number_of_components)
+    # num_lines = sum(1 for _ in open(aids_file_path))
+    # number_of_components = num_lines / 3
+    # return math.ceil(relative_threshold * number_of_components)
+    return 50
 
 
 def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=experiment_folder_prefix):
@@ -285,14 +305,21 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
     print("Evaluation running...")
 
     # Remove old evaluation files and create new empty files
-    os.remove(experiment_path + "/stats_topn.csv")
-    os.remove(experiment_path + "/stats_topn_frequency.csv")
-    with open(experiment_path + "/stats_topn.csv", 'w') as stats_tpn:
+    os.remove(os.path.join(experiment_path, 'stats_topn.csv'))
+    os.remove(os.path.join(experiment_path, 'stats_topn_frequency.csv'))
+
+    with open(os.path.join(experiment_path, 'stats_topn.csv'), 'w') as stats_tpn:
         stats_tpn.write(
-            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
-    with open(experiment_path + "/stats_topn_frequency.csv", 'w') as stats_tpn:
+            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", '
+            '"avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", '
+            '"size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", '
+            '"score", "score_2"\r\n')
+    with open(os.path.join(experiment_path, 'stats_topn_frequency.csv'), 'w') as stats_tpn:
         stats_tpn.write(
-            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", "avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", "size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", "score", "score_2"\r\n')
+            '"cnt_diffs", "cnt_eos", "pertubation", "avg_nb_nodes_per_component", "avg_nb_edges_per_component", '
+            '"avg_degree_per_component", "avg_nb_components_per_diff", "cnt_components", "support_threshold", '
+            '"size_at_threshold", "cnt_exact_match", "cnt_exact_match_2", "elapsed_time_mining", "heap_size", '
+            '"score", "score_2"\r\n')
 
     # Evaluate each experiment_scripts
     for set_name in os.listdir(experiment_path):
@@ -302,20 +329,20 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
             continue
 
         # Read threshold and runtime
-        with open(experiment_path + "/" + set_name + "/threshold.txt", 'r') as threshold_file:
+        with open(os.path.join(experiment_path, set_name, 'threshold.txt'), 'r') as threshold_file:
             threshold = threshold_file.read()
-        with open(experiment_path + "/" + set_name + "/runtime.txt", 'r') as runtime_file:
+        with open(os.path.join(experiment_path, set_name, 'runtime.txt'), 'r') as runtime_file:
             runtime = runtime_file.read()
-        with open(experiment_path + "/" + set_name + "/heap_size.txt", 'r') as heap_size_file:
+        with open(os.path.join(experiment_path, set_name, 'heap_size.txt'), 'r') as heap_size_file:
             heap_size = heap_size_file.read()
 
         # Start evaluation script
         # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path,
+        evaluation.main(os.path.join(experiment_path, set_name), threshold, 50, runtime, False, True, True,
+                        experiment_path,
                         heap_size, algorithm)
 
     print("Evaluation done")
-
 
 if __name__ == "__main__":
     if len(sys.argv) == 4:
@@ -326,6 +353,8 @@ if __name__ == "__main__":
         experiment_path = "../data/experiment_subdue_pilot"
         algorithm = "subdue_c"
         exp_folder_prefix = experiment_folder_prefix
-        run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
-                       experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=False, skip_mining=False, skip_evaluation=False)
+    run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
+                   experiment_folder_prefix=exp_folder_prefix,
+                   #skip_preparation=True, skip_mining=True, skip_evaluation=False)
+                   #skip_preparation=False, skip_mining=False, skip_evaluation=True)
+                    skip_preparation=False, skip_mining=False, skip_evaluation=False)

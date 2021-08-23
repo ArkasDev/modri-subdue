@@ -64,8 +64,8 @@ class ParsemisMiner:
 
     def __init__(self, data_location, mine_undirected=True, debug=True):
         self.data_location = data_location
-        self.lib_location = "%s/lib/" % os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-        self.parsemis_location = self.lib_location + "parsemis.jar"
+        self.lib_location = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), 'lib')
+        self.parsemis_location = os.path.join(self.lib_location, 'parsemis.jar')
 
         if debug:
             self.debug_statement = "-Dverbose=true"
@@ -74,8 +74,10 @@ class ParsemisMiner:
 
         self.mine_undirected = mine_undirected
 
-        self.input_file = "%s/connected_components.lg" % self.data_location
-        self.output_file = "%s/fsg.output" % self.data_location
+        self.input_file = os.path.join(self.data_location, 'connected_components.lg')
+        #self.input_file = os.path.join(self.data_location, 'connected_components_numeric.lg')
+        self.output_file = os.path.join(self.data_location, 'fsg.output')
+        #self.output_file = os.path.join(self.data_location, 'fsg_numeric.output')
 
     def mine_graphs(self, graphs, **kwargs):
         print("Mining %i graphs" % len(graphs))
