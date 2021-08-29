@@ -39,21 +39,22 @@ experiment_2_path = "../data/experiment_2"
 python_v_2_7_path = "C:\\Python2716\\python.exe"
 
 # Relative threshold for the frequent subgraph mining algorithms
-relative_threshold = 0.4
+relative_threshold = 0.05
 
 
 def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_folder_prefix=experiment_folder_prefix,
-                   skip_preparation=True, skip_mining=False, skip_evaluation=False):
+                   skip_preparation=True, skip_mining=False, skip_evaluation=False, input_formatting=compute.INPUT_FORMAT_NX):
     """
     :param experiment_data_set_path: Path to the experiment_scripts data set
     :param algorithm: Use an algorithm for graph mining the model repositories: gaston, gspan, subdue_c, subdue_python, modri_subdue
     :param skip_preparation: If true it skips the experiment_scripts preparation. Usually only needs to be performed once
     :param skip_mining: If true it skips the graph mining phase
     :param skip_evaluation: If true it skips the evaluation phase
+    :param input_formatting: NX if a folder with many networkx jsons is input database, LG if a single line graph formatted file is input
     """
 
     if not skip_preparation:
-        prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix)
+        prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix, formatting=input_formatting)
 
     if not skip_mining:
         run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix)
@@ -62,7 +63,7 @@ def run_experiment(experiment_data_set_path, algorithm="gaston", experiment_fold
         experiment_evaluation(experiment_data_set_path, algorithm, experiment_folder_prefix=experiment_folder_prefix)
 
 
-def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix):
+def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experiment_folder_prefix, formatting=compute.INPUT_FORMAT_NX):
     print("########################################")
     print("### Experiment preparation ")
     print("########################################")
@@ -78,7 +79,7 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
 
         # Create graph input files via compute component script
         # These graph files are required as input for the mining graph algorithms
-        compute.main(experiment_data_set_path + "/" + single_set_name)
+        compute.main(experiment_data_set_path + "/" + single_set_name, formatting=formatting)
 
         # Compute threshold required for the mining phase of the frequent subgraph mining algorithms
         threshold = compute_threshold(experiment_data_set_path + "/" + single_set_name + "/connected_components.aids")
@@ -92,14 +93,14 @@ def prepare_experiment(experiment_data_set_path, experiment_folder_prefix=experi
             output_graph_file.write("")
 
         # Plot correct graphs
-        graph = []
-        correct_graph_1 = pickle.load(open(experiment_data_set_path + "/correct_graph_networkx.p", "rb"))
-        graph.append(correct_graph_1)
-        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph")
-        graph = []
-        correct_graph_2 = pickle.load(open(experiment_data_set_path + "/correct_graph_2_networkx.p", "rb"))
-        graph.append(correct_graph_2)
-        evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph_2")
+        #graph = []
+        #correct_graph_1 = pickle.load(open(experiment_data_set_path + "/correct_graph_networkx.p", "rb"))
+        #graph.append(correct_graph_1)
+        #evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph")
+        #graph = []
+        #correct_graph_2 = pickle.load(open(experiment_data_set_path + "/correct_graph_2_networkx.p", "rb"))
+        #graph.append(correct_graph_2)
+        #evaluation.plot_graphs(graph, experiment_data_set_path + "/correct_graph_2")
 
     print("Preparation done")
 
@@ -118,10 +119,14 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
         if not single_set_name.startswith(experiment_folder_prefix):
             continue
 
+
         # Start performance test, start measuring the runtime and the heap space
-        heap = hpy()
-        start_heap_status = heap.heap()
+        
+        #heap = hpy()
+        #start_heap_status = heap.heap()
         start_time = time.time()
+
+
 
         # Load the threshold calculated during the preparation phase
         with open(experiment_data_set_path + "/" + single_set_name + "/threshold.txt", 'r') as threshold_file:
@@ -165,11 +170,11 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
 
         # End performance test
         end_time = time.time()
-        end_heap_status = heap.heap()
+        #end_heap_status = heap.heap()
         runtime = end_time - start_time
-        heap_stats = end_heap_status.diff(start_heap_status)
+        #heap_stats = end_heap_status.diff(start_heap_status)
         print("Runtime: %s s" % runtime)
-        print("Heap: %s bytes" % str(heap_stats.size))
+        #print("Heap: %s bytes" % str(heap_stats.size))
         print("-------------------------------")
 
         # Save runtime (seconds) in file for eval
@@ -177,8 +182,8 @@ def run_graph_mining(experiment_data_set_path, algorithm, experiment_folder_pref
             runtime_file.write(str(runtime))
 
         # Save heap size (bytes) in file for eval
-        with open(experiment_data_set_path + "/" + single_set_name + "/heap_size.txt", 'w') as heap_size_file:
-            heap_size_file.write(str(heap_stats.size))
+        #with open(experiment_data_set_path + "/" + single_set_name + "/heap_size.txt", 'w') as heap_size_file:
+        #    heap_size_file.write(str(heap_stats.size))
 
     print("Mining done")
 
@@ -193,16 +198,16 @@ def run_subdue_python(experiment_path, graph_file, under_test_implementation=Fal
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 3
+    parameters.beamWidth = 4
     parameters.iterations = 1
     parameters.limit = 50
-    parameters.maxSize = 50
-    parameters.minSize = 3
+    parameters.maxSize = 10
+    parameters.minSize = 1
     parameters.numBest = 1
     parameters.overlap = 'vertex'
 
     # only for under test
-    parameters.eval = 3
+    parameters.eval = 1
 
     parameters.prune = False
     parameters.valueBased = False
@@ -238,7 +243,7 @@ def run_subdue_c(experiment_path):
     parameters.numBest = 1
     parameters.overlap = True
 
-    parameters.eval = 2
+    parameters.eval = 1
     parameters.undirected = True
     parameters.prune = False
     parameters.valueBased = False
@@ -300,7 +305,7 @@ def run_gspan(experiment_path, graph, threshold):
         store_embeddings=True,
         distribution="threads",
         n_threads=1,
-        algorithm="gspan"
+        algorithm="gpsan"
     )
 
 
@@ -344,21 +349,24 @@ def experiment_evaluation(experiment_path, algorithm, experiment_folder_prefix=e
 
         # Start evaluation script
         # path, threshold, max_n, elapsed_time_mining, is_simulation, is_evaluation, print_results,...
-        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, True, True, True, experiment_path,
+        evaluation.main(experiment_path + "/" + set_name, threshold, 50, runtime, False, False, True, experiment_path,
                         heap_size, algorithm)
 
     print("Evaluation done")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         experiment_path = sys.argv[1]
         algorithm = sys.argv[2]
         exp_folder_prefix = sys.argv[3]
+        input_formatting = sys.argv[4]
     else:
-        experiment_path = "../data/experiment_3"
+        experiment_path = "../data/experiment_subdue_pilot"
         algorithm = "subdue_python_under_test"
         exp_folder_prefix = experiment_folder_prefix
-        run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
+        input_formatting = compute.INPUT_FORMAT_NX
+    
+    run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
                        experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=True, skip_mining=False, skip_evaluation=False)
+                       skip_preparation=True, skip_mining=False, skip_evaluation=False, input_formatting=input_formatting)

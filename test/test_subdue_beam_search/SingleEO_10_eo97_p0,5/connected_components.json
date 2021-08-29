@@ -49,58 +49,58 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "9",
-    "attributes": {"label": "Add_Requirement"}}},
+    "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "10",
     "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "11",
-    "attributes": {"label": "Add_Connector"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "12",
-    "attributes": {"label": "Preserve_Port"}}},
+    "attributes": {"label": "Add_Requirement"}}},
   {"vertex": {
     "id": "13",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Connector"}}},
   {"edge": {
     "id": "5",
     "source": "9",
-    "target": "11",
-    "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
-  {"edge": {
-    "id": "6",
-    "source": "9",
     "target": "13",
     "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
+    "attributes": {"label": "Add_tgt"}}},
+  {"edge": {
+    "id": "6",
+    "source": "10",
+    "target": "13",
+    "directed": "false",
+    "attributes": {"label": "Add_src"}}},
   {"edge": {
     "id": "7",
-    "source": "10",
-    "target": "11",
+    "source": "11",
+    "target": "13",
     "directed": "false",
-    "attributes": {"label": "Add_tgt"}}},
+    "attributes": {"label": "Add_connector"}}},
   {"edge": {
     "id": "8",
     "source": "11",
     "target": "12",
     "directed": "false",
-    "attributes": {"label": "Add_src"}}},
+    "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "9",
-    "source": "11",
+    "source": "12",
     "target": "13",
     "directed": "false",
-    "attributes": {"label": "Add_connector"}}},
+    "attributes": {"label": "Add_requirement"}}},
   {"vertex": {
     "id": "14",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"vertex": {
     "id": "15",
     "attributes": {"label": "Add_Package"}}},
   {"vertex": {
     "id": "16",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"edge": {
     "id": "10",
     "source": "14",
@@ -109,8 +109,8 @@
     "attributes": {"label": "Add_package"}}},
   {"edge": {
     "id": "11",
-    "source": "14",
-    "target": "15",
+    "source": "15",
+    "target": "16",
     "directed": "false",
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
@@ -124,10 +124,10 @@
     "attributes": {"label": "Add_Connector"}}},
   {"vertex": {
     "id": "20",
-    "attributes": {"label": "Preserve_Port"}}},
+    "attributes": {"label": "Add_Requirement"}}},
   {"vertex": {
     "id": "21",
-    "attributes": {"label": "Add_Requirement"}}},
+    "attributes": {"label": "Preserve_Port"}}},
   {"edge": {
     "id": "12",
     "source": "17",
@@ -143,19 +143,19 @@
   {"edge": {
     "id": "14",
     "source": "18",
-    "target": "21",
+    "target": "20",
     "directed": "false",
     "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "15",
     "source": "19",
-    "target": "21",
+    "target": "20",
     "directed": "false",
     "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "16",
     "source": "19",
-    "target": "20",
+    "target": "21",
     "directed": "false",
     "attributes": {"label": "Add_src"}}},
   {"vertex": {
@@ -172,10 +172,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "24",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "25",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"edge": {
     "id": "18",
     "source": "24",
@@ -184,10 +184,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "26",
-    "attributes": {"label": "Add_Port"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"vertex": {
     "id": "27",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Add_Port"}}},
   {"edge": {
     "id": "19",
     "source": "26",
@@ -208,10 +208,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "30",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"vertex": {
     "id": "31",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"edge": {
     "id": "21",
     "source": "30",
@@ -244,10 +244,10 @@
     "attributes": {"label": "Remove_component"}}},
   {"vertex": {
     "id": "36",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Preserve_SwImplementation"}}},
   {"vertex": {
     "id": "37",
-    "attributes": {"label": "Preserve_SwImplementation"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"edge": {
     "id": "24",
     "source": "36",
@@ -256,10 +256,10 @@
     "attributes": {"label": "Remove_component"}}},
   {"vertex": {
     "id": "38",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Add_Port"}}},
   {"vertex": {
     "id": "39",
-    "attributes": {"label": "Add_Port"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"edge": {
     "id": "25",
     "source": "38",
@@ -304,10 +304,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "46",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "47",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"edge": {
     "id": "29",
     "source": "46",
@@ -340,100 +340,100 @@
     "attributes": {"label": "Remove_component"}}},
   {"vertex": {
     "id": "52",
-    "attributes": {"label": "Add_Requirement"}}},
-  {"vertex": {
-    "id": "53",
-    "attributes": {"label": "Preserve_Port"}}},
-  {"vertex": {
-    "id": "54",
     "attributes": {"label": "Add_Connector"}}},
   {"vertex": {
-    "id": "55",
+    "id": "53",
+    "attributes": {"label": "Add_Requirement"}}},
+  {"vertex": {
+    "id": "54",
     "attributes": {"label": "Preserve_Package"}}},
+  {"vertex": {
+    "id": "55",
+    "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "56",
     "attributes": {"label": "Preserve_Port"}}},
   {"edge": {
     "id": "32",
     "source": "52",
-    "target": "54",
+    "target": "53",
     "directed": "false",
     "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "33",
     "source": "52",
-    "target": "55",
-    "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
-  {"edge": {
-    "id": "34",
-    "source": "53",
-    "target": "54",
-    "directed": "false",
-    "attributes": {"label": "Add_tgt"}}},
-  {"edge": {
-    "id": "35",
-    "source": "54",
     "target": "56",
     "directed": "false",
     "attributes": {"label": "Add_src"}}},
   {"edge": {
-    "id": "36",
-    "source": "54",
+    "id": "34",
+    "source": "52",
     "target": "55",
     "directed": "false",
+    "attributes": {"label": "Add_tgt"}}},
+  {"edge": {
+    "id": "35",
+    "source": "52",
+    "target": "54",
+    "directed": "false",
     "attributes": {"label": "Add_connector"}}},
+  {"edge": {
+    "id": "36",
+    "source": "53",
+    "target": "54",
+    "directed": "false",
+    "attributes": {"label": "Add_requirement"}}},
   {"vertex": {
     "id": "57",
-    "attributes": {"label": "Add_Requirement"}}},
+    "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "58",
-    "attributes": {"label": "Add_Connector"}}},
+    "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "59",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Requirement"}}},
   {"vertex": {
     "id": "60",
-    "attributes": {"label": "Preserve_Port"}}},
+    "attributes": {"label": "Add_Connector"}}},
   {"vertex": {
     "id": "61",
-    "attributes": {"label": "Preserve_Port"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"edge": {
     "id": "37",
     "source": "57",
-    "target": "58",
-    "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
-  {"edge": {
-    "id": "38",
-    "source": "57",
-    "target": "59",
-    "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
-  {"edge": {
-    "id": "39",
-    "source": "58",
     "target": "60",
     "directed": "false",
     "attributes": {"label": "Add_src"}}},
   {"edge": {
-    "id": "40",
+    "id": "38",
     "source": "58",
-    "target": "61",
+    "target": "60",
     "directed": "false",
     "attributes": {"label": "Add_tgt"}}},
   {"edge": {
+    "id": "39",
+    "source": "59",
+    "target": "60",
+    "directed": "false",
+    "attributes": {"label": "Add_requirement"}}},
+  {"edge": {
+    "id": "40",
+    "source": "59",
+    "target": "61",
+    "directed": "false",
+    "attributes": {"label": "Add_requirement"}}},
+  {"edge": {
     "id": "41",
-    "source": "58",
-    "target": "59",
+    "source": "60",
+    "target": "61",
     "directed": "false",
     "attributes": {"label": "Add_connector"}}},
   {"vertex": {
     "id": "62",
-    "attributes": {"label": "Add_Port"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"vertex": {
     "id": "63",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Add_Port"}}},
   {"edge": {
     "id": "42",
     "source": "62",
@@ -442,10 +442,10 @@
     "attributes": {"label": "Add_port"}}},
   {"vertex": {
     "id": "64",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "65",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"edge": {
     "id": "43",
     "source": "64",
@@ -454,10 +454,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "66",
-    "attributes": {"label": "Preserve_SwImplementation"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"vertex": {
     "id": "67",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Preserve_SwImplementation"}}},
   {"edge": {
     "id": "44",
     "source": "66",
@@ -514,10 +514,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "76",
-    "attributes": {"label": "Preserve_SwImplementation"}}},
+    "attributes": {"label": "Preserve_Component"}}},
   {"vertex": {
     "id": "77",
-    "attributes": {"label": "Preserve_Component"}}},
+    "attributes": {"label": "Preserve_SwImplementation"}}},
   {"edge": {
     "id": "49",
     "source": "76",
@@ -526,55 +526,55 @@
     "attributes": {"label": "Remove_component"}}},
   {"vertex": {
     "id": "78",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Preserve_Port"}}},
   {"vertex": {
     "id": "79",
-    "attributes": {"label": "Add_Requirement"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "80",
-    "attributes": {"label": "Preserve_Port"}}},
-  {"vertex": {
-    "id": "81",
     "attributes": {"label": "Add_Connector"}}},
   {"vertex": {
-    "id": "82",
+    "id": "81",
     "attributes": {"label": "Preserve_Port"}}},
+  {"vertex": {
+    "id": "82",
+    "attributes": {"label": "Add_Requirement"}}},
   {"edge": {
     "id": "50",
     "source": "78",
-    "target": "81",
+    "target": "80",
+    "directed": "false",
+    "attributes": {"label": "Add_tgt"}}},
+  {"edge": {
+    "id": "51",
+    "source": "79",
+    "target": "80",
     "directed": "false",
     "attributes": {"label": "Add_connector"}}},
   {"edge": {
-    "id": "51",
-    "source": "78",
-    "target": "79",
-    "directed": "false",
-    "attributes": {"label": "Add_requirement"}}},
-  {"edge": {
     "id": "52",
     "source": "79",
-    "target": "81",
+    "target": "82",
     "directed": "false",
     "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "53",
     "source": "80",
-    "target": "81",
+    "target": "82",
     "directed": "false",
-    "attributes": {"label": "Add_tgt"}}},
+    "attributes": {"label": "Add_requirement"}}},
   {"edge": {
     "id": "54",
-    "source": "81",
-    "target": "82",
+    "source": "80",
+    "target": "81",
     "directed": "false",
     "attributes": {"label": "Add_src"}}},
   {"vertex": {
     "id": "83",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "84",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"edge": {
     "id": "55",
     "source": "83",
@@ -583,10 +583,10 @@
     "attributes": {"label": "Add_package"}}},
   {"vertex": {
     "id": "85",
-    "attributes": {"label": "Add_Package"}}},
+    "attributes": {"label": "Preserve_Package"}}},
   {"vertex": {
     "id": "86",
-    "attributes": {"label": "Preserve_Package"}}},
+    "attributes": {"label": "Add_Package"}}},
   {"edge": {
     "id": "56",
     "source": "85",
