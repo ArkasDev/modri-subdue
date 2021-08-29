@@ -303,10 +303,25 @@ def InstancesOverlap(overlap, instanceList, instance):
 def InstanceOverlap(overlap, instance1, instance2):
     """Returns True if given instances overlap according to given overlap parameter.
     See InstancesOverlap for explanation."""
+
     if overlap == "edge":
         return InstanceMatch(instance1, instance2)
     elif overlap == "vertex":
         return instance1.edges.intersect(instance2.edges)
+    elif overlap == "preserve_vertex":
+        instance1_none_preserve = OrderedSet()
+        for a in instance1.vertices:
+            if "Preserve" not in a.attributes['label']:
+                instance1_none_preserve.add(a)
+        i1 = Instance()
+        i1.vertices = instance1_none_preserve
+        instance2_none_preserve = OrderedSet()
+        for b in instance2.vertices:
+            if "Preserve" not in b.attributes['label']:
+                instance2_none_preserve.add(b)
+        i2 = Instance()
+        i2.vertices = instance2_none_preserve
+        return instance1.edges.intersect(instance2.edges) and i1.vertices.intersect(i2.vertices)
     else: # overlap == "none"
         return instance1.vertices.intersect(instance2.vertices)
 

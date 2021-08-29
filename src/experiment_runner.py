@@ -193,7 +193,7 @@ def run_subdue_python(experiment_path, graph_file, under_test_implementation=Fal
     parameters.experimentFolder = experiment_path
     parameters.outputFileName = experiment_path + "/subdue_python.output"
 
-    parameters.beamWidth = 4
+    parameters.beamWidth = 3
     parameters.iterations = 1
     parameters.limit = 50
     parameters.maxSize = 50
@@ -202,7 +202,7 @@ def run_subdue_python(experiment_path, graph_file, under_test_implementation=Fal
     parameters.overlap = 'vertex'
 
     # only for under test
-    parameters.eval = 4
+    parameters.eval = 3
 
     parameters.prune = False
     parameters.valueBased = False
@@ -356,9 +356,9 @@ if __name__ == "__main__":
         algorithm = sys.argv[2]
         exp_folder_prefix = sys.argv[3]
     else:
-        experiment_path = "../data/experiment_subdue_pilot"
+        experiment_path = "../data/experiment_3"
         algorithm = "subdue_python_under_test"
         exp_folder_prefix = experiment_folder_prefix
         run_experiment(experiment_data_set_path=experiment_path, algorithm=algorithm,
                        experiment_folder_prefix=exp_folder_prefix,
-                       skip_preparation=False, skip_mining=False, skip_evaluation=False)
+                       skip_preparation=True, skip_mining=False, skip_evaluation=False)
